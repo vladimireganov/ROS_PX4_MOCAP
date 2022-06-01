@@ -1,3 +1,5 @@
+#include <chrono>
+
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <mavros_msgs/CommandBool.h>
@@ -18,6 +20,8 @@ void get_pos(const geometry_msgs::PoseStamped& msg){
 
 int main(int argc, char **argv)
 {
+    clock_t start;
+    bool flag = true;
     ros::init(argc, argv, "offb_node");
     ros::NodeHandle nh;
 
@@ -71,13 +75,8 @@ int main(int argc, char **argv)
     arming_client.call(arm_cmd); 
 
     ///
-    Timer t = Timer();
-    t.setTimeout([&]() {
-        pose.pose.position.x = position.pose.position.x;
-        pose.pose.position.y = position.pose.position.y;
-        pose.pose.position.z = position.pose.position.z + 1;
-        t.stop();
-    }, 5200);
+    start = clock();
+
     ///
 
     ROS_INFO("TAKEOFF");
@@ -104,6 +103,12 @@ int main(int argc, char **argv)
 
         ros::spinOnce();
         rate.sleep();
+        if (clock() - start > 5 && flag){
+            pose.pose.position.x = position.pose.position.x;
+            pose.pose.position.y = position.pose.position.y;
+            pose.pose.position.z = position.pose.position.z - 1;
+            flag = false;
+        }
     }
     arming_client.call(arm_cmd2);
     return 0;
