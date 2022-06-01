@@ -70,6 +70,16 @@ int main(int argc, char **argv)
     set_mode_client.call(offb_set_mode);
     arming_client.call(arm_cmd); 
 
+    ///
+    Timer t = Timer();
+    t.setTimeout([&]() {
+        pose.pose.position.x = position.pose.position.x;
+        pose.pose.position.y = position.pose.position.y;
+        pose.pose.position.z = position.pose.position.z + 1;
+        t.stop();
+    }, 5200);
+    ///
+
     ROS_INFO("TAKEOFF");
     while(ros::ok()){
     //    if( current_state.mode != "OFFBOARD" &&
