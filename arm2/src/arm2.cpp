@@ -73,9 +73,10 @@ int main(int argc, char **argv)
     ros::Time last_request = ros::Time::now();
     
     arming_client.call(arm_cmd); 
-
+    ROS_INFO("ARMED");
 
     set_mode_client.call(offb_set_mode);
+    ROS_INFO("OFFBOARD");
     ///
     start = clock();
 
@@ -110,6 +111,7 @@ int main(int argc, char **argv)
             pose.pose.position.y = position.pose.position.y;
             pose.pose.position.z = position.pose.position.z - 1.2;
             flag = false;
+            ROS_INFO("LANDING");
         }
     }
     arming_client.call(arm_cmd2);
