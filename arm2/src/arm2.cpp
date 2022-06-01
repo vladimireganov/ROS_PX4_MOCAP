@@ -108,7 +108,7 @@ int main(int argc, char **argv)
         if (clock() - start > 5 && flag){
             pose.pose.position.x = position.pose.position.x;
             pose.pose.position.y = position.pose.position.y;
-            pose.pose.position.z = position.pose.position.z - 1;
+            pose.pose.position.z = position.pose.position.z - 1.2;
             flag = false;
         }
     }
