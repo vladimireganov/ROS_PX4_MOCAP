@@ -71,9 +71,11 @@ int main(int argc, char **argv)
     mavros_msgs::CommandBool arm_cmd2;
     arm_cmd2.request.value = false;
     ros::Time last_request = ros::Time::now();
-    set_mode_client.call(offb_set_mode);
+    
     arming_client.call(arm_cmd); 
 
+
+    set_mode_client.call(offb_set_mode);
     ///
     start = clock();
 
