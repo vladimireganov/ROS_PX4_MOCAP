@@ -34,7 +34,7 @@ int main(int argc, char **argv)
     ros::ServiceClient set_mode_client = nh.serviceClient<mavros_msgs::SetMode>
             ("mavros/set_mode");
     
-    ros::Subscriber pos = nh.subscribe<geometry_msgs::PoseStamped>("/mocap_node/drone_3/pose",10,get_pos);
+    ros::Subscriber pos = nh.subscribe<geometry_msgs::PoseStamped>("/mavros/vision_pose/pose",10,get_pos);
 
     //ros::ServiceClient takeoff_cmd = nh.serviceClient<mavros_msgs::CommandTOL>
     //        ("mavros/cmd/takeoff");
