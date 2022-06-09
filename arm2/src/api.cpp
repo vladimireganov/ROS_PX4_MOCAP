@@ -10,11 +10,11 @@ class api
 {
 private:
     mavros_msgs::State current_state;
-    geometry_msgs::PoseStampe position;
-    geometry_msgs::PoseStampe current_position;
-    geometry_msgs::PoseStampe setpoint_position;
+    geometry_msgs::PoseStamped position;
+    geometry_msgs::PoseStamped current_position;
+    geometry_msgs::PoseStamped setpoint_position;
 
-    geometry_msgs::PoseStampe home; // home position
+    geometry_msgs::PoseStamped home; // home position
 
     mavros_msgs::SetMode offb_set_mode; // setting mode
 
@@ -43,7 +43,7 @@ public:
     bool set_mode(string mode);
 
     void take_off(float altitude);
-    void landing();
+    void landing(); //updates altitude for landing
     void set_point(float x, float y , float z);
     void set_point(float x, float y); // for horizontal flight
 
@@ -149,7 +149,7 @@ void api::take_off(float altitude){
 }
 
 void api::landing(){
-
+    setpoint_position.pose.position.z = home.pose.position.z;
 }
 
 void api::march(){
@@ -172,4 +172,7 @@ void api::set_point(float x, float y){
     setpoint_position.pose.position.x = x;
     setpoint_position.pose.position.y = y;
 
+}
+void api::set_home(){
+    home = current_position;
 }
