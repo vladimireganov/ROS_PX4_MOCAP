@@ -10,9 +10,9 @@
 #include "api.h"
 #include <string>
 
-int main(){
+int main(int argc, char **argv){
     
-    api my_drone;
+    api my_drone = api(argc, argv);
     
     my_drone.set_home();
     my_drone.refresh_set_point();
@@ -24,7 +24,7 @@ int main(){
     }
     
     my_drone.arm();
-    my_drone.set_mode("OFFBOARD");
+    my_drone.set_mode(std::string("OFFBOARD"));
 
 
     while(ros::ok()){ //while loop for main program

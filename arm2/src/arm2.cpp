@@ -1,7 +1,13 @@
 #include <chrono>
 
+// #include <ros/ros.h>
+// #include <geometry_msgs/PoseStamped.h>
+// #include <mavros_msgs/CommandBool.h>
+// #include <mavros_msgs/SetMode.h>
+// #include <mavros_msgs/State.h>
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <sensor_msgs/NavSatFix.h>
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
@@ -13,14 +19,15 @@ void state_cb(const mavros_msgs::State::ConstPtr& msg){
     ROS_INFO("%f\n",current_state);
 }
 
-geometry_msgs::PoseStampe position;
-void get_pos(const geometry_msgs::PoseStamped& msg){
+geometry_msgs::PoseStamped position;
+
+void get_pos(const geometry_msgs::PoseStamped::ConstPtr& msg){
     position = *msg;
 }
 
 int main(int argc, char **argv)
 {
-    clock_t start;
+    ros::Time start;
     bool flag = true;
     ros::init(argc, argv, "offb_node");
     ros::NodeHandle nh;
@@ -72,48 +79,127 @@ int main(int argc, char **argv)
     arm_cmd2.request.value = false;
     ros::Time last_request = ros::Time::now();
     
-    arming_client.call(arm_cmd); 
-    ROS_INFO("ARMED");
+    // arming_client.call(arm_cmd); 
+    // ROS_INFO("ARMED");
 
-    set_mode_client.call(offb_set_mode);
-    ROS_INFO("OFFBOARD");
-    ///
-    start = clock();
-
-    ///
-
-    ROS_INFO("TAKEOFF");
+    // set_mode_client.call(offb_set_mode);
+    // ROS_INFO("OFFBOARD");
+    // ///
+    // start = clock();
+    // ///
+    // ROS_INFO("TAKEOFF");
+    arming_client.call(arm_cmd);
     while(ros::ok()){
-    //    if( current_state.mode != "OFFBOARD" &&
-    //        (ros::Time::now() - last_request > ros::Duration(5.0))){
-    //        if( set_mode_client.call(offb_set_mode) &&
-    //            offb_set_mode.response.mode_sent){
-    //            ROS_INFO("Offboard enabled");
-    //        }
-    //        last_request = ros::Time::now();
-    //    } else {
-    //        if( !current_state.armed &&
-    //            (ros::Time::now() - last_request > ros::Duration(5.0))){
-    //            if( arming_client.call(arm_cmd) &&
-    //                arm_cmd.response.success){
-    //                ROS_INFO("Vehicle armed");
-    //            }
-    //            last_request = ros::Time::now();
-    //        }
-    //    }
+       if( current_state.mode != "OFFBOARD" &&
+           (ros::Time::now() - last_request > ros::Duration(5.0))){
+           if( set_mode_client.call(offb_set_mode) &&
+               offb_set_mode.response.mode_sent){
+               ROS_INFO("Offboard enabled");
+    //             pose.pose.position.x = position.pose.position.x;
+    //             pose.pose.position.y = position.pose.position.y;
+    //             pose.pose.position.z = 1;
+
+    // //send a few setpoints before starting
+    //             for(int i = 100; ros::ok() && i > 0; --i){
+    //                 local_pos_pub.publish(pose);
+    //                 ros::spinOnce();
+    //                 rate.sleep();
+    //             }
+           }
+           last_request = ros::Time::now();
+           continue;
+       } else {
+           if( !current_state.armed &&
+               (ros::Time::now() - last_request > ros::Duration(5.0))){
+               if( arming_client.call(arm_cmd) &&
+                   arm_cmd.response.success){
+                   ROS_INFO("Vehicle armed");
+    //                pose.pose.position.x = position.pose.position.x;
+    //                 pose.pose.position.y = position.pose.position.y;
+    //                 pose.pose.position.z = 1;
+
+    // //send a few setpoints before starting
+    //                 for(int i = 100; ros::ok() && i > 0; --i){
+    //                     local_pos_pub.publish(pose);
+    //                     ros::spinOnce();
+    //                     rate.sleep();
+    //                 }
+               }
+               last_request = ros::Time::now();
+               continue;
+           }
+           if( current_state.armed){
+                ROS_INFO("Starting Flight test");
+                break;
+           }
+       }
+       ros::spinOnce();
+        rate.sleep();
+    }
+    ROS_INFO("TAKEOFF");
+    start = ros::Time::now();
+    flag = true;
+    while(ros::ok()){
     //arming_client.call(arm_cmd);
         local_pos_pub.publish(pose);
 
+        
+        if ((ros::Time::now() - start) > ros::Duration(10.0)){
+            // pose.pose.position.x = position.pose.position.x;
+            // pose.pose.position.y = position.pose.position.y;
+            pose.pose.position.z = pose.pose.position.z - 0.5;
+            flag = false;
+            ROS_INFO("Descending");
+        }
         ros::spinOnce();
         rate.sleep();
-        if (clock() - start > 5 && flag){
-            pose.pose.position.x = position.pose.position.x;
-            pose.pose.position.y = position.pose.position.y;
-            pose.pose.position.z = position.pose.position.z - 1.2;
-            flag = false;
-            ROS_INFO("LANDING");
+        if (!flag){
+            break;
         }
     }
+    flag = true;
+    start = ros::Time::now();
+    while(ros::ok()){
+    //arming_client.call(arm_cmd);
+        local_pos_pub.publish(pose);
+
+        
+        if (ros::Time::now() - start > ros::Duration(5.0)){
+            // pose.pose.position.x = position.pose.position.x;
+            // pose.pose.position.y = position.pose.position.y;
+            pose.pose.position.z = pose.pose.position.z - 1.5;
+            // flag = false;
+            flag = false;
+            ROS_INFO("LAND");
+        }
+        ros::spinOnce();
+        rate.sleep();
+        if (!flag){
+            break;
+        }
+    }
+
+    flag = true;
+    start = ros::Time::now();
+    while(ros::ok()){
+    //arming_client.call(arm_cmd);
+        local_pos_pub.publish(pose);
+
+        
+        if (ros::Time::now() - start > ros::Duration(5.0)){
+            // pose.pose.position.x = position.pose.position.x;
+            // pose.pose.position.y = position.pose.position.y;
+            arming_client.call(arm_cmd2);
+        }
+        ros::spinOnce();
+        rate.sleep();
+        if (!flag){
+            break;
+        }
+    }
+
+
     arming_client.call(arm_cmd2);
+    
     return 0;
 }

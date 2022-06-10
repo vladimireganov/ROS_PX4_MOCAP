@@ -9,12 +9,21 @@
 
 #include <string>
 
+
+static void state_cb(const mavros_msgs::State::ConstPtr& msg); //callback function for current state
+static void get_pos(const geometry_msgs::PoseStamped::ConstPtr& msg); // callback function for current positon
+
+static mavros_msgs::State current_state;
+static geometry_msgs::PoseStamped current_position;
+
+
 class api
 {
 private:
-    mavros_msgs::State current_state;
+
+    
     geometry_msgs::PoseStamped position;
-    geometry_msgs::PoseStamped current_position;
+    
     geometry_msgs::PoseStamped setpoint_position;
 
     geometry_msgs::PoseStamped home; // home position
@@ -22,10 +31,12 @@ private:
     mavros_msgs::SetMode offb_set_mode; // setting mode
 
     /* data */
-    void state_cb(const mavros_msgs::State::ConstPtr& msg); //callback function for current state
-    void get_pos(const geometry_msgs::PoseStamped& msg); // callback function for current positon
-
-    ros::init(argc, argv, "offb_node"); //create node
+    
+    
+    /// set streaming rate
+    ros::Rate rate = ros::Rate(20.0);
+    ///
+    
     ros::NodeHandle nh; //create node handling
 
     mavros_msgs::CommandBool arm_cmd; //variable for arming
@@ -39,11 +50,15 @@ private:
 
 
 public:
-    api(/* args */);
+    
+
+
+
+    api(int argc, char **argv);
     ~api();
     bool arm();
     bool disarm();
-    bool set_mode(string mode);
+    bool set_mode(std::string mode);
 
     void take_off(float altitude);
     void landing(); //updates altitude for landing
@@ -54,6 +69,9 @@ public:
     void refresh_set_point();
     void reset();
     void march();  /// applying all changes anf flying
+
+    
+
 };
 /// functions
 /*
@@ -73,17 +91,16 @@ public:
 /*
 * class to work with px4
 */
-api::api(/* args */)
+api::api(int argc, char **argv)
 {
-    /// set streaming rate
-    ros::Rate rate(20.0);
-    ///
+    ros::init(argc, argv, "offb_node"); //create node
+    
 
     // subcribe to state of drone
     state_sub = nh.subscribe<mavros_msgs::State>
             ("mavros/state", 10, state_cb);
     // subcribe to px4 position
-    pos = nh.subscribe<geometry_msgs::PoseStamped>("/mocap_node/drone_3/pose",10,get_pos);// subsribe to topi with proper coordinate system
+    pos = nh.subscribe<geometry_msgs::PoseStamped>("/mavros/vision_pose/pose",10,get_pos);// subsribe to topi with proper coordinate system
 
     local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>
             ("mavros/setpoint_position/local", 10);
@@ -106,11 +123,11 @@ api::~api()
 /*
 *
 */
-void api::state_cb(const mavros_msgs::State::ConstPtr& msg){
+void state_cb(const mavros_msgs::State::ConstPtr& msg){
     current_state = *msg;
     ROS_INFO("%f\n",current_state);
 }
-void api::get_pos(const geometry_msgs::PoseStamped& msg){
+void get_pos(const geometry_msgs::PoseStamped::ConstPtr& msg){
     current_position = *msg;
 }
 
@@ -134,7 +151,7 @@ bool api::disarm(){
 
 
 /// function to change mode
-bool api::set_mode(string mode){
+bool api::set_mode(std::string mode){
     offb_set_mode.request.custom_mode = "OFFBOARD";
     if( set_mode_client.call(offb_set_mode) &&
                 offb_set_mode.response.mode_sent){
