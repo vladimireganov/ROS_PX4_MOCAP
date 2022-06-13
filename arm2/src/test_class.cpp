@@ -9,7 +9,13 @@
 
 #include "api.h"
 #include <string>
-
+///
+/*
+//logic for square flight
+int points_x = [1,0,-1,0];
+int points_y = [0,1,0,-1];
+*/
+///
 int main(int argc, char **argv){
 
     ros::init(argc, argv, "offb_node"); // needed to init ros node
