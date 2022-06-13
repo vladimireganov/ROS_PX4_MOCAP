@@ -73,6 +73,7 @@ private:
 
     ros::Time timer_start;
     ros::Duration dt;
+    float dest_threshold;
     /// experimental finish
     
 public: 
@@ -178,6 +179,7 @@ api::api(int argc, char **argv)
 
 
     /// experimnental finish
+    dest_threshold = .1;
 }
 
 api::~api()
@@ -282,6 +284,14 @@ void api::set_point(float x, float y , float z){
     setpoint_position.pose.position.x = x;
     setpoint_position.pose.position.y = y;
     setpoint_position.pose.position.z = z;
+    #ifdef DEBUG
+    ROS_INFO("setpoint_position position x: %lf",setpoint_position.pose.position.x);
+    ROS_INFO("setpoint_position position y: %lf",setpoint_position.pose.position.y);
+    ROS_INFO("setpoint_position position z: %lf\n",setpoint_position.pose.position.z);
+    ROS_INFO("current_position position x: %lf",current_position.pose.position.x);
+    ROS_INFO("current_position position y: %lf",current_position.pose.position.y);
+    ROS_INFO("current_position position z: %lf\n",current_position.pose.position.z);
+    #endif
 }
 
 void api::set_point(float x, float y){
@@ -312,7 +322,7 @@ bool api::reached_point(){
     float dx = setpoint_position.pose.position.x - current_position.pose.position.x ;
     float dy = setpoint_position.pose.position.y - current_position.pose.position.y ;
     float dz = setpoint_position.pose.position.z - current_position.pose.position.z ;
-    return  sqrt (dx * dx + dy * dy + dz * dz)  < .1;
+    return  sqrt (dx * dx + dy * dy + dz * dz)  < dest_threshold;
 }
 
 void api::set_velocity(float x, float y, float z){
