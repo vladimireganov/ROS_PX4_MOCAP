@@ -241,9 +241,12 @@ void api::set_home(){
 
     // home = current_position;
     #ifdef DEBUG
-    ROS_INFO("home position x: \n %f",home.pose.position.x);
-    ROS_INFO("home position y:  \n%f",home.pose.position.y);
-    ROS_INFO("home position z:  \n%f\n",home.pose.position.z);
+    ROS_INFO("home position x: %lf",home.pose.position.x);
+    ROS_INFO("home position y: %lf",home.pose.position.y);
+    ROS_INFO("home position z: %lf\n",home.pose.position.z);
+    ROS_INFO("current_position position x: %lf",current_position.pose.position.x);
+    ROS_INFO("current_position position y: %lf",current_position.pose.position.y);
+    ROS_INFO("current_position position z: %lf\n",current_position.pose.position.z);
     #endif
     
 }
