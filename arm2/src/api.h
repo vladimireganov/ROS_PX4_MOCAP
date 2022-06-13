@@ -9,6 +9,7 @@
 
 #include <string>
 
+#define DEBUG
 
 static void state_cb(const mavros_msgs::State::ConstPtr& msg); //callback function for current state
 static void get_pos(const geometry_msgs::PoseStamped::ConstPtr& msg); // callback function for current positon
@@ -17,11 +18,13 @@ static mavros_msgs::State current_state;
 static geometry_msgs::PoseStamped current_position;
 
 
+
 class api
 {
 private:
 
-    
+    ros::NodeHandle nh; //create node handling
+
     geometry_msgs::PoseStamped position;
     
     geometry_msgs::PoseStamped setpoint_position;
@@ -32,12 +35,9 @@ private:
 
     /* data */
     
+    ros::Rate rate = ros::Rate(20.0);;
     
-    /// set streaming rate
-    ros::Rate rate = ros::Rate(20.0);
-    ///
     
-    ros::NodeHandle nh; //create node handling
 
     mavros_msgs::CommandBool arm_cmd; //variable for arming
 
@@ -61,15 +61,18 @@ public:
     bool set_mode(std::string mode);
 
     void take_off(float altitude);
+    
     void landing(); //updates altitude for landing
+
     void set_point(float x, float y , float z);
     void set_point(float x, float y); // for horizontal flight
 
-    void set_home();
-    void refresh_set_point();
-    void reset();
+    void set_home(); // sets home position
+    void refresh_set_point(); // refreshes set point to current location
+    void reset(); // reset???
     void march();  /// applying all changes anf flying
 
+    bool reached_point(); // function for checking if point reached 
     
 
 };
@@ -90,10 +93,16 @@ public:
 
 /*
 * class to work with px4
+* @args - input argumets from main
 */
 api::api(int argc, char **argv)
 {
-    ros::init(argc, argv, "offb_node"); //create node
+     //create node
+    
+
+    /// set streaming rate
+    //rate = ros::Rate(20.0);
+    ///
     
 
     // subcribe to state of drone
@@ -121,16 +130,22 @@ api::~api()
 }
 
 /*
-*
+    * call back function to get state of the vehicle
 */
 void state_cb(const mavros_msgs::State::ConstPtr& msg){
     current_state = *msg;
-    ROS_INFO("%f\n",current_state);
+    // ROS_INFO("%f\n",current_state);
 }
+/*
+    * call back function to get position of the drone
+*/
 void get_pos(const geometry_msgs::PoseStamped::ConstPtr& msg){
     current_position = *msg;
 }
-
+/*
+    * function to arm the drone
+    * @return - true/false if arming was sucessful
+*/
 bool api::arm(){
     arm_cmd.request.value = true;
     if( arming_client.call(arm_cmd) && arm_cmd.response.success){
@@ -140,6 +155,10 @@ bool api::arm(){
     else return false;
 }
 
+/*
+    * function to disarm the drone
+    * @return - true/false if disarming was sucessful
+*/
 bool api::disarm(){
     arm_cmd.request.value = false;
     if( arming_client.call(arm_cmd) && arm_cmd.response.success){
@@ -151,6 +170,13 @@ bool api::disarm(){
 
 
 /// function to change mode
+/*
+    * @param - mode to transition to
+    * @return - true on success
+    * supported:
+        "OFFBOARD"
+        "MANUAL"
+*/
 bool api::set_mode(std::string mode){
     offb_set_mode.request.custom_mode = "OFFBOARD";
     if( set_mode_client.call(offb_set_mode) &&
@@ -162,16 +188,28 @@ bool api::set_mode(std::string mode){
         return false;
     }
 }
+/*
+    * function to take off
+    * @param - altitude to go to
 
+*/
 void api::take_off(float altitude){
-    setpoint_position.pose.position.z = altitude;
-
+    setpoint_position.pose.position.z = current_position.pose.position.z + altitude;
 }
 
+/*
+    * function to land
+    * not yet works turning off motors
+
+*/
 void api::landing(){
     setpoint_position.pose.position.z = home.pose.position.z;
+    disarm();
 }
+/*
+    * function to start activity
 
+*/
 void api::march(){
     local_pos_pub.publish(setpoint_position);
     ros::spinOnce();
@@ -179,7 +217,10 @@ void api::march(){
 }
 
 void api::refresh_set_point(){
-    setpoint_position = current_position;
+    // setpoint_position = current_position;
+    setpoint_position.pose.position.x = current_position.pose.position.x;
+    setpoint_position.pose.position.y = current_position.pose.position.y;
+    setpoint_position.pose.position.z = current_position.pose.position.z;
 }
 
 void api::set_point(float x, float y , float z){
@@ -194,5 +235,24 @@ void api::set_point(float x, float y){
 
 }
 void api::set_home(){
-    home = current_position;
+    home.pose.position.x = current_position.pose.position.x;
+    home.pose.position.y = current_position.pose.position.y;
+    home.pose.position.z = current_position.pose.position.z;
+
+    // home = current_position;
+    #ifdef DEBUG
+    ROS_INFO("home position x: \n %f",home.pose.position.x);
+    ROS_INFO("home position y:  \n%f",home.pose.position.y);
+    ROS_INFO("home position z:  \n%f\n",home.pose.position.z);
+    #endif
+    
+}
+/*
+    * function to check if destination reached
+*/
+bool api::reached_point(){
+    float dx = setpoint_position.pose.position.x - current_position.pose.position.x ;
+    float dy = setpoint_position.pose.position.y - current_position.pose.position.y ;
+    float dz = setpoint_position.pose.position.z - current_position.pose.position.z ;
+    return  sqrt (dx * dx + dy * dy + dz * dz)  < .1;
 }
