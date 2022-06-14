@@ -65,15 +65,17 @@ private:
     geometry_msgs::Twist set_vel;
     geometry_msgs::Vector3Stamped set_accel;
     mavros_msgs::PositionTarget set_point_raw;
-    mavros_msgs::WaypointPush mission_push;
+    // mavros_msgs::WaypointPush mission_push;
     ros::Publisher set_vel_pub;
     ros::Publisher set_accel_pub;
     ros::Publisher set_point_raw_pub;
-    ros::Publisher mission_push_pub;
+    // ros::Publisher mission_push_pub;
 
     ros::Time timer_start;
     ros::Duration dt;
     float dest_threshold;
+
+    ros::Publisher set_attitude_pub;
     /// experimental finish
     
 public: 
@@ -88,11 +90,16 @@ public:
     bool set_mode(std::string mode);
 
     void take_off(float altitude);
+    void take_off_2(float altitude);
+
     
     void landing(); //updates altitude for landing
 
     void set_point(float x, float y , float z);
     void set_point(float x, float y); // for horizontal flight
+
+    void set_point_2(float x, float y , float z);
+    void set_point_2(float x, float y); // for horizontal flight
 
     void set_home(); // sets home position
     void refresh_set_point(); // refreshes set point to current location
@@ -109,6 +116,13 @@ public:
     void set_timer(double delta);
 
     bool check_timer();
+
+    void set_attitude(){
+        setpoint_position.pose.orientation.x = current_position.pose.orientation.x;
+        setpoint_position.pose.orientation.y = current_position.pose.orientation.y;
+        setpoint_position.pose.orientation.z = current_position.pose.orientation.z;
+        setpoint_position.pose.orientation.w = current_position.pose.orientation.w;
+    }
     /// experimental finish
 };
 /// functions
@@ -173,8 +187,10 @@ api::api(int argc, char **argv)
             ("mavros/setpoint_accel/accel", 10);
     set_point_raw_pub = nh.advertise<mavros_msgs::PositionTarget>
             ("mavros/setpoint_raw/local", 10);
-    mission_push_pub = nh.advertise<mavros_msgs::WaypointPush>
-            ("mavros/mission/push", 10);
+    set_attitude_pub = nh.advertise<mavros_msgs::PositionTarget>
+            ("mavros/setpoint_attitude/attitude", 10);
+    // mission_push_pub = nh.advertise<mavros_msgs::WaypointPush>
+    //         ("mavros/mission/push", 10);
 
 
 
@@ -253,7 +269,14 @@ bool api::set_mode(std::string mode){
 void api::take_off(float altitude){
     setpoint_position.pose.position.z = current_position.pose.position.z + altitude;
 }
+/*
+    * function to take off
+    * @param - altitude to go to
 
+*/
+void api::take_off_2(float altitude){
+    setpoint_position.pose.position.z += altitude;
+}
 /*
     * function to land
     * not yet works turning off motors
@@ -277,12 +300,29 @@ void api::refresh_set_point(){
     setpoint_position.pose.position.x = current_position.pose.position.x;
     setpoint_position.pose.position.y = current_position.pose.position.y;
     setpoint_position.pose.position.z = current_position.pose.position.z;
+    // setpoint_position.pose.orientation.x = current_position.pose.orientation.x;
+    // setpoint_position.pose.orientation.y = current_position.pose.orientation.y;
+    // setpoint_position.pose.orientation.z = current_position.pose.orientation.z;
+    // setpoint_position.pose.orientation.w = current_position.pose.orientation.w;
 }
 
 void api::set_point(float x, float y , float z){
-    setpoint_position.pose.position.x = x;
-    setpoint_position.pose.position.y = y;
-    setpoint_position.pose.position.z = z;
+    setpoint_position.pose.position.x = current_position.pose.position.x + x;
+    setpoint_position.pose.position.y = current_position.pose.position.y + y;
+    setpoint_position.pose.position.z = current_position.pose.position.z + z;
+    #ifdef DEBUG
+    ROS_INFO("setpoint_position position x: %lf",setpoint_position.pose.position.x);
+    ROS_INFO("setpoint_position position y: %lf",setpoint_position.pose.position.y);
+    ROS_INFO("setpoint_position position z: %lf\n",setpoint_position.pose.position.z);
+    ROS_INFO("current_position position x: %lf",current_position.pose.position.x);
+    ROS_INFO("current_position position y: %lf",current_position.pose.position.y);
+    ROS_INFO("current_position position z: %lf\n",current_position.pose.position.z);
+    #endif
+}
+void api::set_point_2(float x, float y , float z){
+    setpoint_position.pose.position.x += x;
+    setpoint_position.pose.position.y += y;
+    setpoint_position.pose.position.z += z;
     #ifdef DEBUG
     ROS_INFO("setpoint_position position x: %lf",setpoint_position.pose.position.x);
     ROS_INFO("setpoint_position position y: %lf",setpoint_position.pose.position.y);
@@ -294,10 +334,16 @@ void api::set_point(float x, float y , float z){
 }
 
 void api::set_point(float x, float y){
-    setpoint_position.pose.position.x = x;
-    setpoint_position.pose.position.y = y;
+    setpoint_position.pose.position.x = current_position.pose.position.x + x;
+    setpoint_position.pose.position.y = current_position.pose.position.y + y;
 
 }
+void api::set_point_2(float x, float y){
+    setpoint_position.pose.position.x += x;
+    setpoint_position.pose.position.y += y;
+
+}
+
 void api::set_home(){
     home.pose.position.x = current_position.pose.position.x;
     home.pose.position.y = current_position.pose.position.y;
@@ -347,4 +393,5 @@ void api::set_timer(double delta){
 bool api::check_timer(){
     return  timer_start - ros::Time::now() > dt;
 }
+
 
