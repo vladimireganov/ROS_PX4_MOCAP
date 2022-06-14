@@ -27,7 +27,7 @@ int main(int argc, char **argv){
 
     for (int i = 0; i < 100; i++) // send a few initial set points before continueing
     {
-        my_drone.take_off(0.5); // go .5 m up
+        my_drone.take_off(1); // go .5 m up
         my_drone.march(); //send cmds
     }
     
@@ -35,11 +35,31 @@ int main(int argc, char **argv){
     my_drone.set_mode(std::string("OFFBOARD")); //try to ransition into offboard mode
 
 
-    while(ros::ok()){ //while loop for main program
+    while(ros::ok() && !my_drone.reached_point()){ //while loop for main program
         my_drone.march();//spin code (publish set points)
-        if (my_drone.reached_point()){ //check if point was reached
-            ROS_INFO(" reached target position  \n");
-        }
     }
+    ROS_INFO("Take off completed:\n");
+
+    my_drone.set_point(1,1);
+    while(ros::ok() && !my_drone.reached_point()){ //while loop for main program
+        my_drone.march();//spin code (publish set points)
+    }
+    ROS_INFO("Reached first point:\n");
+    my_drone.set_point(0,0);
+    while(ros::ok() && !my_drone.reached_point()){ //while loop for main program
+        my_drone.march();//spin code (publish set points)
+    }
+    ROS_INFO("Reached second point:\n");
+    my_drone.landing();
+
+    while(ros::ok() && !my_drone.reached_point()){ //while loop for main program
+        my_drone.march();//spin code (publish set points)
+    }
+    ROS_INFO("Landed:\n");
+    my_drone.disarm();
+
+
+
+
     return 0;
 }

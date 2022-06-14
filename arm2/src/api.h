@@ -261,7 +261,6 @@ void api::take_off(float altitude){
 */
 void api::landing(){
     setpoint_position.pose.position.z = home.pose.position.z;
-    disarm();
 }
 /*
     * function to start activity
