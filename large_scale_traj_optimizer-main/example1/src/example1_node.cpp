@@ -168,15 +168,27 @@ int main(int argc, char **argv)
         std::cout << "Number of pieces: " << minSnapTraj.getPieceNum() <<"\n";
         std::cout << "Positions\tVelocoty\tAcceleration\n";
 
-        for (int i = 0; i < N; i++){
-            std::cout <<minSnapTraj.getPos(dur[i])[0] <<"\t"<<minSnapTraj.getVel(dur[i])[0] <<"\t"<<minSnapTraj.getAcc(dur[i])[0] << "\n";
-            std::cout <<minSnapTraj.getPos(dur[i])[1] <<"\t"<<minSnapTraj.getVel(dur[i])[1] <<"\t"<<minSnapTraj.getAcc(dur[i])[1] << "\n";
-            std::cout <<minSnapTraj.getPos(dur[i])[2] <<"\t"<<minSnapTraj.getVel(dur[i])[2] <<"\t"<<minSnapTraj.getAcc(dur[i])[2] << "\n";
+        double time_p = 0.0;
+        for (int i = 0 ; i < N; i++ ){
+            std::cout <<minSnapTraj.getPos(time_p)[0] <<"\t"<<minSnapTraj.getVel(time_p)[0] <<"\t"<<minSnapTraj.getAcc(time_p)[0] << "\n";
+            std::cout <<minSnapTraj.getPos(time_p)[1] <<"\t"<<minSnapTraj.getVel(time_p)[1] <<"\t"<<minSnapTraj.getAcc(time_p)[1] << "\n";
+            std::cout <<minSnapTraj.getPos(time_p)[2] <<"\t"<<minSnapTraj.getVel(time_p)[2] <<"\t"<<minSnapTraj.getAcc(time_p)[2] << "\n";
+            time_p += dur[i];
             // std::cout ;
             // std::cout ;
 
         }
 
+
+        std::cout << "getPos :\n";
+        for (double i = 0; i < minSnapTraj.getTotalDuration(); i+= 0.1){
+            // std::cout <<minSnapTraj.getPos(dur[i])[0] <<"\t"<<minSnapTraj.getVel(dur[i])[0] <<"\t"<<minSnapTraj.getAcc(dur[i])[0] << "\n";
+            // std::cout <<minSnapTraj.getPos(dur[i])[1] <<"\t"<<minSnapTraj.getVel(dur[i])[1] <<"\t"<<minSnapTraj.getAcc(dur[i])[1] << "\n";
+            std::cout << "at time: " << i << "\t" <<minSnapTraj.getPos(i) << "\n";
+            // std::cout ;
+            // std::cout ;
+
+        }
 
         ros::spinOnce();
         lp.sleep();
