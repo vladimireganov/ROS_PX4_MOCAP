@@ -123,6 +123,9 @@ public:
         setpoint_position.pose.orientation.z = current_position.pose.orientation.z;
         setpoint_position.pose.orientation.w = current_position.pose.orientation.w;
     }
+
+    void set_point_NED(float x, float y);
+    void set_point_NED(float x, float y, float z);
     /// experimental finish
 };
 /// functions
@@ -294,6 +297,11 @@ void api::march(){
     ros::spinOnce();
     rate.sleep();
 }
+void api::march_NED(){
+    local_pos_pub.publish(setpoint_position);
+    ros::spinOnce();
+    rate.sleep();
+}
 
 void api::refresh_set_point(){
     // setpoint_position = current_position;
@@ -332,6 +340,12 @@ void api::set_point_2(float x, float y , float z){
     ROS_INFO("current_position position z: %lf\n",current_position.pose.position.z);
     #endif
 }
+void api::set_point_NED(float x, float y, float z){
+    setpoint_position.pose.position.x += x;
+    setpoint_position.pose.position.y += y;
+    setpoint_position.pose.position.z -= z;
+}
+
 
 void api::set_point(float x, float y){
     setpoint_position.pose.position.x = current_position.pose.position.x + x;
@@ -342,6 +356,11 @@ void api::set_point_2(float x, float y){
     setpoint_position.pose.position.x += x;
     setpoint_position.pose.position.y += y;
 
+}
+
+void api::set_point_NED(float x, float y){
+    setpoint_position.pose.position.x += x;
+    setpoint_position.pose.position.y += y;
 }
 
 void api::set_home(){
