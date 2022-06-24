@@ -77,7 +77,8 @@ private:
 
     ros::Publisher set_attitude_pub;
     /// experimental finish
-    
+    mavros_msgs::CommandTOL land_cmd;
+    ros::ServiceClient land_client;
 public: 
     
 
@@ -118,14 +119,12 @@ public:
     bool check_timer();
 
     void set_attitude(){
-        setpoint_position.pose.orientation.x = current_position.pose.orientation.x;
-        setpoint_position.pose.orientation.y = current_position.pose.orientation.y;
-        setpoint_position.pose.orientation.z = current_position.pose.orientation.z;
-        setpoint_position.pose.orientation.w = current_position.pose.orientation.w;
+        // setpoint_position.pose.orientation.x = current_position.pose.orientation.x;
+        // setpoint_position.pose.orientation.y = current_position.pose.orientation.y;
+        // setpoint_position.pose.orientation.z = current_position.pose.orientation.z;
+        // setpoint_position.pose.orientation.w = current_position.pose.orientation.w;
     }
-
-    void set_point_NED(float x, float y);
-    void set_point_NED(float x, float y, float z);
+    void land();
     /// experimental finish
 };
 /// functions
@@ -195,8 +194,11 @@ api::api(int argc, char **argv)
     // mission_push_pub = nh.advertise<mavros_msgs::WaypointPush>
     //         ("mavros/mission/push", 10);
 
-
-
+    land_cmd.request.yaw = 0.0;
+    land_cmd.request.latitude = 0;
+    land_cmd.request.longitude = 0;
+    land_cmd.request.altitude = 0;
+    land_client = nh.serviceClient<mavros_msgs::CommandTOL>("mavros/cmd/land");
     /// experimnental finish
     dest_threshold = .1;
 }
@@ -297,11 +299,6 @@ void api::march(){
     ros::spinOnce();
     rate.sleep();
 }
-void api::march_NED(){
-    local_pos_pub.publish(setpoint_position);
-    ros::spinOnce();
-    rate.sleep();
-}
 
 void api::refresh_set_point(){
     // setpoint_position = current_position;
@@ -340,12 +337,6 @@ void api::set_point_2(float x, float y , float z){
     ROS_INFO("current_position position z: %lf\n",current_position.pose.position.z);
     #endif
 }
-void api::set_point_NED(float x, float y, float z){
-    setpoint_position.pose.position.x += x;
-    setpoint_position.pose.position.y += y;
-    setpoint_position.pose.position.z -= z;
-}
-
 
 void api::set_point(float x, float y){
     setpoint_position.pose.position.x = current_position.pose.position.x + x;
@@ -356,11 +347,6 @@ void api::set_point_2(float x, float y){
     setpoint_position.pose.position.x += x;
     setpoint_position.pose.position.y += y;
 
-}
-
-void api::set_point_NED(float x, float y){
-    setpoint_position.pose.position.x += x;
-    setpoint_position.pose.position.y += y;
 }
 
 void api::set_home(){
@@ -414,3 +400,7 @@ bool api::check_timer(){
 }
 
 
+void api::land(){
+    land_client.call(land_cmd);
+
+}
