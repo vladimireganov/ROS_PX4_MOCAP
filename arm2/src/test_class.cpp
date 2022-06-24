@@ -29,10 +29,11 @@ int main(int argc, char **argv){
     {
         
         my_drone.march(); //send cmds
+        // my_drone.set_attitude();
     }
-    
+    my_drone.set_attitude();
     my_drone.arm(); // try to arm
-    my_drone.set_mode(std::string("OFFBOARD")); //try to ransition into offboard mode
+    my_drone.set_mode(std::string("OFFBOARD")); //try to transition into offboard mode
 
     my_drone.take_off_2(1); // go .5 m up
     while(ros::ok() && !my_drone.reached_point()){ //while loop for main program
@@ -51,10 +52,12 @@ int main(int argc, char **argv){
     }
     ROS_INFO("Reached second point:\n");
     my_drone.landing();
-
-    while(ros::ok() && !my_drone.reached_point()){ //while loop for main program
-        my_drone.march();//spin code (publish set points)
-    }
+    my_drone.land();
+    // while(ros::ok() && !my_drone.reached_point()){ //while loop for main program
+    //     my_drone.march();//spin code (publish set points)
+    // }
+    my_drone.set_timer(5.0);
+    while ( ! my_drone.check_timer() &&ros::ok()){}
     ROS_INFO("Landed:\n");
     my_drone.disarm();
 

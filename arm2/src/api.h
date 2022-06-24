@@ -5,11 +5,12 @@
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
-
+#include <mavros_msgs/CommandTOL.h>
+#include <mavros_msgs/PositionTarget.h>
 // added libs
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Vector3Stamped.h>
-#include <mavros_msgs/PositionTarget.h>
+#include <mavros_msgs/AttitudeTarget.h>
 #include <mavros_msgs/WaypointPush.h>
 
 
@@ -79,6 +80,11 @@ private:
     /// experimental finish
     mavros_msgs::CommandTOL land_cmd;
     ros::ServiceClient land_client;
+
+    mavros_msgs::AttitudeTarget attitude_tar;
+    geometry_msgs::PoseStamped attitude;
+    ros::Publisher set_attitude_raw_pub;
+
 public: 
     
 
@@ -119,10 +125,21 @@ public:
     bool check_timer();
 
     void set_attitude(){
-        // setpoint_position.pose.orientation.x = current_position.pose.orientation.x;
-        // setpoint_position.pose.orientation.y = current_position.pose.orientation.y;
-        // setpoint_position.pose.orientation.z = current_position.pose.orientation.z;
-        // setpoint_position.pose.orientation.w = current_position.pose.orientation.w;
+        // attitude.yaw = 0;
+        // attitude.type_mask = 1023;
+        attitude.pose.orientation.x = 0;//home.pose.orientation.x;
+        attitude.pose.orientation.y = 0;//home.pose.orientation.y;
+        attitude.pose.orientation.z = 0;//home.pose.orientation.z;
+        attitude.pose.orientation.w = -1;//home.pose.orientation.w;
+        // setpoint_position.pose.orientation.x = 0;//home.pose.orientation.x;
+        // setpoint_position.pose.orientation.y = 0;//home.pose.orientation.y;
+        // setpoint_position.pose.orientation.z = 0;//home.pose.orientation.z;
+        // setpoint_position.pose.orientation.w = 1;//home.pose.orientation.w;
+        attitude_tar.type_mask = 3;
+        attitude_tar.orientation.x = 0;
+        attitude_tar.orientation.y = 0;
+        attitude_tar.orientation.z = 0;
+        attitude_tar.orientation.w = -1;
     }
     void land();
     /// experimental finish
@@ -189,10 +206,12 @@ api::api(int argc, char **argv)
             ("mavros/setpoint_accel/accel", 10);
     set_point_raw_pub = nh.advertise<mavros_msgs::PositionTarget>
             ("mavros/setpoint_raw/local", 10);
-    set_attitude_pub = nh.advertise<mavros_msgs::PositionTarget>
+    set_attitude_pub = nh.advertise<geometry_msgs::PoseStamped>
             ("mavros/setpoint_attitude/attitude", 10);
     // mission_push_pub = nh.advertise<mavros_msgs::WaypointPush>
     //         ("mavros/mission/push", 10);
+    set_attitude_raw_pub = nh.advertise<mavros_msgs::AttitudeTarget>
+            ("mavros/setpoint_raw/attitude", 10);
 
     land_cmd.request.yaw = 0.0;
     land_cmd.request.latitude = 0;
@@ -296,6 +315,8 @@ void api::landing(){
 */
 void api::march(){
     local_pos_pub.publish(setpoint_position);
+    set_attitude_pub.publish(attitude);
+    set_attitude_raw_pub.publish(attitude_tar);
     ros::spinOnce();
     rate.sleep();
 }
@@ -305,10 +326,10 @@ void api::refresh_set_point(){
     setpoint_position.pose.position.x = current_position.pose.position.x;
     setpoint_position.pose.position.y = current_position.pose.position.y;
     setpoint_position.pose.position.z = current_position.pose.position.z;
-    // setpoint_position.pose.orientation.x = current_position.pose.orientation.x;
-    // setpoint_position.pose.orientation.y = current_position.pose.orientation.y;
-    // setpoint_position.pose.orientation.z = current_position.pose.orientation.z;
-    // setpoint_position.pose.orientation.w = current_position.pose.orientation.w;
+    setpoint_position.pose.orientation.x = 0;
+    setpoint_position.pose.orientation.y = 0;
+    setpoint_position.pose.orientation.z = 0;
+    setpoint_position.pose.orientation.w = -1;
 }
 
 void api::set_point(float x, float y , float z){
@@ -353,7 +374,10 @@ void api::set_home(){
     home.pose.position.x = current_position.pose.position.x;
     home.pose.position.y = current_position.pose.position.y;
     home.pose.position.z = current_position.pose.position.z;
-
+    home.pose.orientation.x = 0;//current_position.pose.orientation.x;
+    home.pose.orientation.y = 0;//current_position.pose.orientation.y;
+    home.pose.orientation.z = 0;//current_position.pose.orientation.z;
+    home.pose.orientation.w = -1;//current_position.pose.orientation.w;
     // home = current_position;
     #ifdef DEBUG
     ROS_INFO("home position x: %lf",home.pose.position.x);
@@ -396,7 +420,7 @@ void api::set_timer(double delta){
 
 
 bool api::check_timer(){
-    return  timer_start - ros::Time::now() > dt;
+    return  ros::Time::now() - timer_start > dt;
 }
 
 
