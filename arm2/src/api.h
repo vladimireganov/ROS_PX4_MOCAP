@@ -43,10 +43,8 @@ private:
 
     /* data */
     
-    ros::Rate rate = ros::Rate(20.0);;
+    ros::Rate rate = ros::Rate(20.0);
     
-    
-
     mavros_msgs::CommandBool arm_cmd; //variable for arming
 
     // ros topics and services
@@ -56,21 +54,15 @@ private:
     ros::ServiceClient arming_client;
     ros::ServiceClient set_mode_client;
 
-
     /// experimental features
 
-    ///mission/push (mavros_msgs/WaypointPush)
-    ///setpoint_raw/local (mavros_msgs/PositionTarget)
-    ///setpoint_accel/accel (geometry_msgs/Vector3Stamped)
-    ///setpoint_velocity/cmd_vel_unstamped (geometry_msgs/Twist)
     geometry_msgs::Twist set_vel;
     geometry_msgs::Vector3Stamped set_accel;
     mavros_msgs::PositionTarget set_point_raw;
-    // mavros_msgs::WaypointPush mission_push;
+
     ros::Publisher set_vel_pub;
     ros::Publisher set_accel_pub;
     ros::Publisher set_point_raw_pub;
-    // ros::Publisher mission_push_pub;
 
     ros::Time timer_start;
     ros::Duration dt;
@@ -108,10 +100,15 @@ public:
     void set_point_2(float x, float y , float z);
     void set_point_2(float x, float y); // for horizontal flight
 
+    void set_point_NED(float x, float y , float z); //data sent in NED 
+    void set_point_NED(float x, float y);
+
     void set_home(); // sets home position
     void refresh_set_point(); // refreshes set point to current location
     void reset(); // reset???
     void march();  /// applying all changes anf flying
+
+    void march_NED();
 
     bool reached_point(); // function for checking if point reached 
     
@@ -124,23 +121,7 @@ public:
 
     bool check_timer();
 
-    void set_attitude(){
-        // attitude.yaw = 0;
-        // attitude.type_mask = 1023;
-        attitude.pose.orientation.x = 0;//home.pose.orientation.x;
-        attitude.pose.orientation.y = 0;//home.pose.orientation.y;
-        attitude.pose.orientation.z = 0;//home.pose.orientation.z;
-        attitude.pose.orientation.w = -1;//home.pose.orientation.w;
-        // setpoint_position.pose.orientation.x = 0;//home.pose.orientation.x;
-        // setpoint_position.pose.orientation.y = 0;//home.pose.orientation.y;
-        // setpoint_position.pose.orientation.z = 0;//home.pose.orientation.z;
-        // setpoint_position.pose.orientation.w = 1;//home.pose.orientation.w;
-        attitude_tar.type_mask = 3;
-        attitude_tar.orientation.x = 0;
-        attitude_tar.orientation.y = 0;
-        attitude_tar.orientation.z = 0;
-        attitude_tar.orientation.w = -1;
-    }
+    void set_attitude();
     void land();
     /// experimental finish
 };
@@ -188,18 +169,6 @@ api::api(int argc, char **argv)
     set_mode_client = nh.serviceClient<mavros_msgs::SetMode> //client to set mode
             ("mavros/set_mode");
 
-    ///setpoint_raw - topic to test
-    ///mission/reached - topic to test
-    
-    /// experimental features
-    // geometry_msgs::Twist set_vel;
-    // geometry_msgs::Vector3Stamped set_accel;
-    // mavros_msgs::PositionTarget set_point_raw;
-    // mavros_msgs::WaypointPush mission_push;
-    ///mission/push (mavros_msgs/WaypointPush)
-    ///setpoint_raw/local (mavros_msgs/PositionTarget)
-    ///setpoint_accel/accel (geometry_msgs/Vector3Stamped)
-    ///setpoint_velocity/cmd_vel_unstamped (geometry_msgs/Twist)
     set_vel_pub = nh.advertise<geometry_msgs::Twist>
             ("mavros/setpoint_velocity/cmd_vel_unstamped", 10);
     set_accel_pub = nh.advertise<geometry_msgs::Vector3Stamped>
@@ -220,6 +189,10 @@ api::api(int argc, char **argv)
     land_client = nh.serviceClient<mavros_msgs::CommandTOL>("mavros/cmd/land");
     /// experimnental finish
     dest_threshold = .1;
+
+    set_point_raw.coordinate_frame = 1;
+    set_point_raw.type_mask = 0;
+
 }
 
 api::~api()
@@ -321,6 +294,13 @@ void api::march(){
     rate.sleep();
 }
 
+void api::march_NED(){
+    set_point_raw_pub.publish(set_point_raw);
+    ros::spinOnce();
+    rate.sleep();
+}
+
+
 void api::refresh_set_point(){
     // setpoint_position = current_position;
     setpoint_position.pose.position.x = current_position.pose.position.x;
@@ -331,6 +311,17 @@ void api::refresh_set_point(){
     setpoint_position.pose.orientation.z = 0;
     setpoint_position.pose.orientation.w = -1;
 }
+void api::refresh_set_point_NED(){
+    // setpoint_position = current_position;
+    setpoint_position_NED.pose.position.x = current_position.pose.position.x;
+    setpoint_position_NED.pose.position.y = current_position.pose.position.y;
+    setpoint_position_NED.pose.position.z = current_position.pose.position.z;
+    setpoint_position_NED.pose.orientation.x = 0;
+    setpoint_position_NED.pose.orientation.y = 0;
+    setpoint_position_NED.pose.orientation.z = 0;
+    setpoint_position_NED.pose.orientation.w = -1;
+}
+
 
 void api::set_point(float x, float y , float z){
     setpoint_position.pose.position.x = current_position.pose.position.x + x;
@@ -358,6 +349,14 @@ void api::set_point_2(float x, float y , float z){
     ROS_INFO("current_position position z: %lf\n",current_position.pose.position.z);
     #endif
 }
+void api::set_point_NED (float x, float y , float z){
+    set_point_raw.position.x += x;
+    set_point_raw.position.y += y;
+    set_point_raw.position.z -= z;
+    #ifdef DEBUG
+
+    #endif
+}
 
 void api::set_point(float x, float y){
     setpoint_position.pose.position.x = current_position.pose.position.x + x;
@@ -369,6 +368,12 @@ void api::set_point_2(float x, float y){
     setpoint_position.pose.position.y += y;
 
 }
+
+void api::set_point_NED(float x, float y){
+    set_point_raw.position.x += x;
+    set_point_raw.position.y += y;
+}
+
 
 void api::set_home(){
     home.pose.position.x = current_position.pose.position.x;
@@ -426,5 +431,25 @@ bool api::check_timer(){
 
 void api::land(){
     land_client.call(land_cmd);
+
+}
+
+void api::set_attitude(float roll, float pitch, float yaw){
+    // attitude.yaw = 0;
+    // attitude.type_mask = 1023;
+    attitude.pose.orientation.setRPY( roll, pitch, yaw );
+    // attitude.pose.orientation.x = 0;//home.pose.orientation.x;
+    // attitude.pose.orientation.y = 0;//home.pose.orientation.y;
+    // attitude.pose.orientation.z = 0;//home.pose.orientation.z;
+    // attitude.pose.orientation.w = -1;//home.pose.orientation.w;
+    // // setpoint_position.pose.orientation.x = 0;//home.pose.orientation.x;
+    // // setpoint_position.pose.orientation.y = 0;//home.pose.orientation.y;
+    // // setpoint_position.pose.orientation.z = 0;//home.pose.orientation.z;
+    // // setpoint_position.pose.orientation.w = 1;//home.pose.orientation.w;
+    // attitude_tar.type_mask = 3;
+    // attitude_tar.orientation.x = 0;
+    // attitude_tar.orientation.y = 0;
+    // attitude_tar.orientation.z = 0;
+    // attitude_tar.orientation.w = -1;
 
 }
