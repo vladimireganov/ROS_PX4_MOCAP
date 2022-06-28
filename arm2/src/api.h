@@ -43,7 +43,7 @@ private:
 
     /* data */
     
-    ros::Rate rate = ros::Rate(20.0);
+    ros::Rate rate = ros::Rate(40.0);
     
     mavros_msgs::CommandBool arm_cmd; //variable for arming
 
@@ -105,6 +105,7 @@ public:
 
     void set_home(); // sets home position
     void refresh_set_point(); // refreshes set point to current location
+    void refresh_set_point_NED();
     void reset(); // reset???
     void march();  /// applying all changes anf flying
 
@@ -121,8 +122,9 @@ public:
 
     bool check_timer();
 
-    void set_attitude();
+    void set_attitude(float roll, float pitch, float yaw);
     void land();
+    void take_off_NED(float altitude);
     /// experimental finish
 };
 /// functions
@@ -156,12 +158,12 @@ api::api(int argc, char **argv)
 
     // subcribe to state of drone
     state_sub = nh.subscribe<mavros_msgs::State>
-            ("mavros/state", 10, state_cb);
+            ("mavros/state", 1, state_cb);
     // subcribe to px4 position
-    pos = nh.subscribe<geometry_msgs::PoseStamped>("/mavros/vision_pose/pose",10,get_pos);// subsribe to topi with proper coordinate system
+    pos = nh.subscribe<geometry_msgs::PoseStamped>("/mavros/vision_pose/pose",1,get_pos);// subsribe to topi with proper coordinate system
 
     local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>
-            ("mavros/setpoint_position/local", 10);
+            ("mavros/setpoint_position/local", 1);
 
     arming_client = nh.serviceClient<mavros_msgs::CommandBool> //client to arm
             ("mavros/cmd/arming");
@@ -170,17 +172,17 @@ api::api(int argc, char **argv)
             ("mavros/set_mode");
 
     set_vel_pub = nh.advertise<geometry_msgs::Twist>
-            ("mavros/setpoint_velocity/cmd_vel_unstamped", 10);
+            ("mavros/setpoint_velocity/cmd_vel_unstamped", 1);
     set_accel_pub = nh.advertise<geometry_msgs::Vector3Stamped>
-            ("mavros/setpoint_accel/accel", 10);
+            ("mavros/setpoint_accel/accel", 1);
     set_point_raw_pub = nh.advertise<mavros_msgs::PositionTarget>
-            ("mavros/setpoint_raw/local", 10);
+            ("mavros/setpoint_raw/local", 1);
     set_attitude_pub = nh.advertise<geometry_msgs::PoseStamped>
-            ("mavros/setpoint_attitude/attitude", 10);
+            ("mavros/setpoint_attitude/attitude", 1);
     // mission_push_pub = nh.advertise<mavros_msgs::WaypointPush>
     //         ("mavros/mission/push", 10);
     set_attitude_raw_pub = nh.advertise<mavros_msgs::AttitudeTarget>
-            ("mavros/setpoint_raw/attitude", 10);
+            ("mavros/setpoint_raw/attitude", 1);
 
     land_cmd.request.yaw = 0.0;
     land_cmd.request.latitude = 0;
@@ -192,6 +194,7 @@ api::api(int argc, char **argv)
 
     set_point_raw.coordinate_frame = 1;
     set_point_raw.type_mask = 0;
+    set_point_raw.yaw = -1.7;
 
 }
 
@@ -274,6 +277,10 @@ void api::take_off(float altitude){
 void api::take_off_2(float altitude){
     setpoint_position.pose.position.z += altitude;
 }
+void api::take_off_NED(float altitude){
+    set_point_raw.position.z -= altitude;
+}
+
 /*
     * function to land
     * not yet works turning off motors
@@ -288,7 +295,7 @@ void api::landing(){
 */
 void api::march(){
     local_pos_pub.publish(setpoint_position);
-    set_attitude_pub.publish(attitude);
+    // set_attitude_pub.publish(attitude);
     set_attitude_raw_pub.publish(attitude_tar);
     ros::spinOnce();
     rate.sleep();
@@ -296,6 +303,7 @@ void api::march(){
 
 void api::march_NED(){
     set_point_raw_pub.publish(set_point_raw);
+    set_attitude_raw_pub.publish(attitude_tar);
     ros::spinOnce();
     rate.sleep();
 }
@@ -306,20 +314,20 @@ void api::refresh_set_point(){
     setpoint_position.pose.position.x = current_position.pose.position.x;
     setpoint_position.pose.position.y = current_position.pose.position.y;
     setpoint_position.pose.position.z = current_position.pose.position.z;
-    setpoint_position.pose.orientation.x = 0;
-    setpoint_position.pose.orientation.y = 0;
-    setpoint_position.pose.orientation.z = 0;
-    setpoint_position.pose.orientation.w = -1;
+    // setpoint_position.pose.orientation.x = 0;
+    // setpoint_position.pose.orientation.y = 0;
+    // setpoint_position.pose.orientation.z = 0;
+    // setpoint_position.pose.orientation.w = -1;
 }
 void api::refresh_set_point_NED(){
     // setpoint_position = current_position;
-    setpoint_position_NED.pose.position.x = current_position.pose.position.x;
-    setpoint_position_NED.pose.position.y = current_position.pose.position.y;
-    setpoint_position_NED.pose.position.z = current_position.pose.position.z;
-    setpoint_position_NED.pose.orientation.x = 0;
-    setpoint_position_NED.pose.orientation.y = 0;
-    setpoint_position_NED.pose.orientation.z = 0;
-    setpoint_position_NED.pose.orientation.w = -1;
+    // set_point_raw.pose.position.x = current_position.pose.position.x;
+    // set_point_raw.pose.position.y = current_position.pose.position.y;
+    // set_point_raw.pose.position.z = current_position.pose.position.z;
+    // set_point_raw.pose.orientation.x = 0;
+    // set_point_raw.pose.orientation.y = 0;
+    // set_point_raw.pose.orientation.z = 0;
+    // set_point_raw.pose.orientation.w = -1;
 }
 
 
@@ -437,7 +445,7 @@ void api::land(){
 void api::set_attitude(float roll, float pitch, float yaw){
     // attitude.yaw = 0;
     // attitude.type_mask = 1023;
-    attitude.pose.orientation.setRPY( roll, pitch, yaw );
+    // attitude.pose.orientation.setRPY( roll, pitch, yaw );
     // attitude.pose.orientation.x = 0;//home.pose.orientation.x;
     // attitude.pose.orientation.y = 0;//home.pose.orientation.y;
     // attitude.pose.orientation.z = 0;//home.pose.orientation.z;
@@ -446,10 +454,11 @@ void api::set_attitude(float roll, float pitch, float yaw){
     // // setpoint_position.pose.orientation.y = 0;//home.pose.orientation.y;
     // // setpoint_position.pose.orientation.z = 0;//home.pose.orientation.z;
     // // setpoint_position.pose.orientation.w = 1;//home.pose.orientation.w;
-    // attitude_tar.type_mask = 3;
-    // attitude_tar.orientation.x = 0;
-    // attitude_tar.orientation.y = 0;
-    // attitude_tar.orientation.z = 0;
-    // attitude_tar.orientation.w = -1;
+    attitude_tar.type_mask = 64+1+2+4;
+    attitude_tar.orientation.x = 0;
+    attitude_tar.orientation.y = 0;
+    attitude_tar.orientation.z = .76;
+    attitude_tar.orientation.w = -0.64;
+    attitude_tar.header.frame_id = "map";
 
 }
