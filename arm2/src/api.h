@@ -43,7 +43,7 @@ private:
 
     /* data */
     
-    ros::Rate rate = ros::Rate(40.0);
+    ros::Rate rate = ros::Rate(30.0);
     
     mavros_msgs::CommandBool arm_cmd; //variable for arming
 
@@ -122,9 +122,10 @@ public:
 
     bool check_timer();
 
-    void set_attitude(float roll, float pitch, float yaw);
+    void set_attitude(float yaw);
     void land();
     void take_off_NED(float altitude);
+    bool reached_point_NED();
     /// experimental finish
 };
 /// functions
@@ -158,12 +159,12 @@ api::api(int argc, char **argv)
 
     // subcribe to state of drone
     state_sub = nh.subscribe<mavros_msgs::State>
-            ("mavros/state", 1, state_cb);
+            ("mavros/state", 10, state_cb);
     // subcribe to px4 position
-    pos = nh.subscribe<geometry_msgs::PoseStamped>("/mavros/vision_pose/pose",1,get_pos);// subsribe to topi with proper coordinate system
+    pos = nh.subscribe<geometry_msgs::PoseStamped>("/mavros/vision_pose/pose",10,get_pos);// subsribe to topi with proper coordinate system
 
     local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>
-            ("mavros/setpoint_position/local", 1);
+            ("mavros/setpoint_position/local", 10);
 
     arming_client = nh.serviceClient<mavros_msgs::CommandBool> //client to arm
             ("mavros/cmd/arming");
@@ -176,13 +177,13 @@ api::api(int argc, char **argv)
     set_accel_pub = nh.advertise<geometry_msgs::Vector3Stamped>
             ("mavros/setpoint_accel/accel", 1);
     set_point_raw_pub = nh.advertise<mavros_msgs::PositionTarget>
-            ("mavros/setpoint_raw/local", 1);
+            ("mavros/setpoint_raw/local", 10);
     set_attitude_pub = nh.advertise<geometry_msgs::PoseStamped>
-            ("mavros/setpoint_attitude/attitude", 1);
+            ("mavros/setpoint_attitude/attitude", 10);
     // mission_push_pub = nh.advertise<mavros_msgs::WaypointPush>
     //         ("mavros/mission/push", 10);
     set_attitude_raw_pub = nh.advertise<mavros_msgs::AttitudeTarget>
-            ("mavros/setpoint_raw/attitude", 1);
+            ("mavros/setpoint_raw/attitude", 10);
 
     land_cmd.request.yaw = 0.0;
     land_cmd.request.latitude = 0;
@@ -194,8 +195,10 @@ api::api(int argc, char **argv)
 
     set_point_raw.coordinate_frame = 1;
     set_point_raw.type_mask = 0;
-    set_point_raw.yaw = -1.7;
-
+    set_point_raw.yaw = 1.0;
+    set_point_raw.yaw_rate = .1;
+    attitude_tar.type_mask = 64;
+    attitude_tar.thrust = .6;
 }
 
 api::~api()
@@ -278,7 +281,7 @@ void api::take_off_2(float altitude){
     setpoint_position.pose.position.z += altitude;
 }
 void api::take_off_NED(float altitude){
-    set_point_raw.position.z -= altitude;
+    set_point_raw.position.z += altitude;
 }
 
 /*
@@ -296,7 +299,7 @@ void api::landing(){
 void api::march(){
     local_pos_pub.publish(setpoint_position);
     // set_attitude_pub.publish(attitude);
-    set_attitude_raw_pub.publish(attitude_tar);
+    // set_attitude_raw_pub.publish(attitude_tar);
     ros::spinOnce();
     rate.sleep();
 }
@@ -320,6 +323,9 @@ void api::refresh_set_point(){
     // setpoint_position.pose.orientation.w = -1;
 }
 void api::refresh_set_point_NED(){
+    set_point_raw.position.x = current_position.pose.position.x;
+    set_point_raw.position.y = current_position.pose.position.y;
+    set_point_raw.position.z = current_position.pose.position.z;
     // setpoint_position = current_position;
     // set_point_raw.pose.position.x = current_position.pose.position.x;
     // set_point_raw.pose.position.y = current_position.pose.position.y;
@@ -411,6 +417,12 @@ bool api::reached_point(){
     float dz = setpoint_position.pose.position.z - current_position.pose.position.z ;
     return  sqrt (dx * dx + dy * dy + dz * dz)  < dest_threshold;
 }
+bool api::reached_point_NED(){
+    float dx = set_point_raw.position.x - current_position.pose.position.x ;
+    float dy = set_point_raw.position.y - current_position.pose.position.y ;
+    float dz = set_point_raw.position.z - current_position.pose.position.z ;
+    return  sqrt (dx * dx + dy * dy + dz * dz)  < dest_threshold;
+}
 
 void api::set_velocity(float x, float y, float z){
     set_vel.linear.x = x;
@@ -442,23 +454,24 @@ void api::land(){
 
 }
 
-void api::set_attitude(float roll, float pitch, float yaw){
+void api::set_attitude(float yaw){
     // attitude.yaw = 0;
     // attitude.type_mask = 1023;
     // attitude.pose.orientation.setRPY( roll, pitch, yaw );
-    // attitude.pose.orientation.x = 0;//home.pose.orientation.x;
-    // attitude.pose.orientation.y = 0;//home.pose.orientation.y;
-    // attitude.pose.orientation.z = 0;//home.pose.orientation.z;
-    // attitude.pose.orientation.w = -1;//home.pose.orientation.w;
+    attitude_tar.orientation.x = 0;//home.pose.orientation.x;
+    attitude_tar.orientation.y = 0;//home.pose.orientation.y;
+    attitude_tar.orientation.z = 0;//home.pose.orientation.z;
+    attitude_tar.orientation.w = -1;//home.pose.orientation.w;
     // // setpoint_position.pose.orientation.x = 0;//home.pose.orientation.x;
     // // setpoint_position.pose.orientation.y = 0;//home.pose.orientation.y;
     // // setpoint_position.pose.orientation.z = 0;//home.pose.orientation.z;
     // // setpoint_position.pose.orientation.w = 1;//home.pose.orientation.w;
-    attitude_tar.type_mask = 64+1+2+4;
-    attitude_tar.orientation.x = 0;
-    attitude_tar.orientation.y = 0;
-    attitude_tar.orientation.z = .76;
-    attitude_tar.orientation.w = -0.64;
-    attitude_tar.header.frame_id = "map";
+    attitude_tar.type_mask = 64;
+    // attitude_tar.orientation.x = 0;
+    // attitude_tar.orientation.y = 0;
+    // attitude_tar.orientation.z = .76;
+    // attitude_tar.orientation.w = -0.64;
+    // attitude_tar.header.frame_id = "map";
+    set_point_raw.yaw = yaw;
 
 }
