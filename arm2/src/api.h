@@ -185,7 +185,7 @@ api::api(int argc, char **argv)
 
     set_point_raw.coordinate_frame = 1;
     set_point_raw.type_mask = 0;
-    set_point_raw.yaw = 1.0;
+    set_point_raw.yaw = 1.5708;
     set_point_raw.yaw_rate = .1;
 }
 
@@ -440,5 +440,5 @@ void api::land(){
 }
 
 void api::set_attitude(float yaw){
-    set_point_raw.yaw = yaw;
+    set_point_raw.yaw += yaw;
 }
