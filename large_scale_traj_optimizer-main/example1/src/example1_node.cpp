@@ -11,7 +11,7 @@
 
 #include <ros/ros.h>
 
-#include <fstream>
+#include "file_write.hpp"
 
 using namespace std;
 using namespace ros;
@@ -189,8 +189,25 @@ int main(int argc, char **argv)
             std::cout << "at time: " << i << "\t" <<minSnapTraj.getPos(i) << "\n";
             // std::cout ;
             // std::cout ;
-
         }
+        Data min_snap_data;
+        Data min_jerk_data;
+
+        File_write min_snap_file = File_write("snap",min_snap_data);
+        File_write min_jerk_file = File_write("jerk",min_jerk_data);
+
+        min_snap_file.create_table_names();
+        for (double i = 0; i < minSnapTraj.getTotalDuration(); i+= 0.1){ //discretization time
+            min_snap_data.time = i;
+            min_snap_data.iteration++;
+            min_snap_data.position = minSnapTraj.getPos(i);
+            min_snap_data.velocity = minSnapTraj.getVel(i);
+            min_snap_data.acceleration = minSnapTraj.getAcc(i);
+            min_snap_file.save_data();
+        }
+        min_snap_file.close_files();
+
+
 
         ros::spinOnce();
         lp.sleep();
