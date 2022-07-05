@@ -462,9 +462,9 @@ void api::get_position_ret(float &x,float &y,float &z,float &yaw ){
     // tf2::Matrix3x3().getRPY(roll, pitch, yaw);
     tf2::Quaternion q;
     tf2::fromMsg(current_position.pose.orientation,q);
-    tf2::Matrix3x3(q).getRPY(this.roll, this.pitch, this.yaw); //extract roll pitch yaw from current position
-    x = position.pose.pose.x;
-    y = position.pose.pose.y;
-    z = position.pose.pose.z;
-    yaw = this.yaw;
+    tf2::Matrix3x3(q).getRPY(this->roll, this->pitch, this->yaw); //extract roll pitch yaw from current position
+    x = position.pose.position.x;
+    y = position.pose.position.y;
+    z = position.pose.position.z;
+    yaw = this->yaw;
 }
