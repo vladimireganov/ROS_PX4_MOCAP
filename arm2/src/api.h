@@ -15,8 +15,9 @@
 
 // added libs
 #include "geometry_msgs/Quaternion.h"
-#include "tf/transform_datatypes.h"
-#include "LinearMath/btMatrix3x3.h"
+#include "tf2/transform_datatypes.h"
+#include "tf2/LinearMath/Matrix3x3.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 
 
 #include <string>
@@ -116,12 +117,15 @@ public:
 
     bool check_timer();
 
-    void set_attitude(float yaw); // function to set yaw
+    
     void land(); // cmd to start landing
     void take_off_NED(float altitude);
     bool reached_point_NED();
     /// experimnetal features
     void get_position(); // function to get current position into variable "position"
+    void set_heading_offset(float yaw); // function to set yaw as offset to current
+    void set_heading_global(float yaw); // function to set yaw
+    void init_heading(); // set point heading as current heading
     /// experimental finish
 };
 
@@ -410,8 +414,16 @@ void api::land(){
 
 }
 
-void api::set_attitude(float yaw){
+void api::set_heading_offset(float yaw){
     set_point_raw.yaw += yaw;
+}
+
+void api::set_heading_global(float yaw){
+    set_point_raw.yaw = yaw;
+}
+
+void api::init_heading(){
+    set_point_raw.yaw = yaw;
 }
 
 /*
@@ -419,5 +431,8 @@ void api::set_attitude(float yaw){
 */
 void api::get_position(){
     position = current_position;
-    tf::Matrix3x3(current_position.orientation).getRPY(roll, pitch, yaw); //extract roll pitch yaw from current position
+    // tf2::Matrix3x3().getRPY(roll, pitch, yaw);
+    tf2::Quaternion q;
+    tf2::fromMsg(current_position.pose.orientation,q);
+    tf2::Matrix3x3(q).getRPY(roll, pitch, yaw); //extract roll pitch yaw from current position
 }
