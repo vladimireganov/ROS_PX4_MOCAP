@@ -7,12 +7,16 @@
 #include <mavros_msgs/State.h>
 #include <mavros_msgs/CommandTOL.h>
 #include <mavros_msgs/PositionTarget.h>
-// added libs
+
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Vector3Stamped.h>
 #include <mavros_msgs/AttitudeTarget.h>
-#include <mavros_msgs/WaypointPush.h>
+// #include <mavros_msgs/WaypointPush.h>
 
+// added libs
+#include "geometry_msgs/Quaternion.h"
+#include "tf/transform_datatypes.h"
+#include "LinearMath/btMatrix3x3.h"
 
 
 #include <string>
@@ -33,7 +37,7 @@ private:
 
     ros::NodeHandle nh; //create node handling
 
-    geometry_msgs::PoseStamped position;
+    geometry_msgs::PoseStamped position; //current position?
     
     geometry_msgs::PoseStamped setpoint_position;
 
@@ -41,39 +45,37 @@ private:
 
     mavros_msgs::SetMode offb_set_mode; // setting mode
 
+    mavros_msgs::PositionTarget set_point_raw; // handling positions
+
+    mavros_msgs::CommandTOL land_cmd; // variable for landing
+
     /* data */
     
-    ros::Rate rate = ros::Rate(30.0);
+    ros::Rate rate = ros::Rate(30.0); // update frequency
     
     mavros_msgs::CommandBool arm_cmd; //variable for arming
 
     // ros topics and services
-    ros::Subscriber state_sub;
-    ros::Subscriber pos;
-    ros::Publisher local_pos_pub;
-    ros::ServiceClient arming_client;
-    ros::ServiceClient set_mode_client;
+    ros::Subscriber state_sub; // subcribing to current state
+    ros::Subscriber pos; // subcribing to current position 
+    ros::Publisher local_pos_pub; // publising local position?
+    ros::Publisher set_point_raw_pub; // publising set point
+    ros::ServiceClient arming_client; //service for arming
+    ros::ServiceClient set_mode_client; // service for setting mode
+    ros::ServiceClient land_client; // servicce for landing
 
-    /// experimental features
-
-    geometry_msgs::Twist set_vel;
-    geometry_msgs::Vector3Stamped set_accel;
-    mavros_msgs::PositionTarget set_point_raw;
-
-    ros::Publisher set_vel_pub;
-    ros::Publisher set_accel_pub;
-    ros::Publisher set_point_raw_pub;
-
+    // timer
     ros::Time timer_start;
     ros::Duration dt;
-    float dest_threshold;
 
-    ros::Publisher set_attitude_pub;
+    float dest_threshold; // precision for position based navigation
+
+    /// experimental features
+    double roll, pitch, yaw;
+
+    
     /// experimental finish
-    mavros_msgs::CommandTOL land_cmd;
-    ros::ServiceClient land_client;
-
-
+    
 public: 
     
 
@@ -81,17 +83,17 @@ public:
 
     api(int argc, char **argv);
     ~api();
-    bool arm();
-    bool disarm();
-    bool set_mode(std::string mode);
+    bool arm(); // function to arm
+    bool disarm(); //function to disarm
+    bool set_mode(std::string mode); // function to set mode
 
     void take_off(float altitude);
-    void take_off_2(float altitude);
+    void take_off_2(float altitude); // take of in ENU
 
     
     void landing(); //updates altitude for landing
 
-    void set_point(float x, float y , float z);
+    void set_point(float x, float y , float z); // ENU system
     void set_point(float x, float y); // for horizontal flight
 
     void set_point_2(float x, float y , float z);
@@ -110,35 +112,19 @@ public:
 
     bool reached_point(); // function for checking if point reached 
     
-    /// experimnetal features
-    void set_velocity(float x, float y, float z);
-
-    void set_acceleration(float x, float y, float z);
-
     void set_timer(double delta);
 
     bool check_timer();
 
-    void set_attitude(float yaw);
-    void land();
+    void set_attitude(float yaw); // function to set yaw
+    void land(); // cmd to start landing
     void take_off_NED(float altitude);
     bool reached_point_NED();
+    /// experimnetal features
+    void get_position(); // function to get current position into variable "position"
     /// experimental finish
 };
-/// functions
-/*
-- arm
-- disarm
-- switch to off board
-- take off
-- landing
-- set point point
-- set point velocity
-/- set point acceleration
-- state?
 
-*/
-///
 
 /*
 * class to work with px4
@@ -169,11 +155,7 @@ api::api(int argc, char **argv)
     set_mode_client = nh.serviceClient<mavros_msgs::SetMode> //client to set mode
             ("mavros/set_mode");
 
-    set_vel_pub = nh.advertise<geometry_msgs::Twist>
-            ("mavros/setpoint_velocity/cmd_vel_unstamped", 1);
-    set_accel_pub = nh.advertise<geometry_msgs::Vector3Stamped>
-            ("mavros/setpoint_accel/accel", 1);
-    set_point_raw_pub = nh.advertise<mavros_msgs::PositionTarget>
+    set_point_raw_pub = nh.advertise<mavros_msgs::PositionTarget> // publisher for set point
             ("mavros/setpoint_raw/local", 10);
     land_cmd.request.yaw = 0.0;
     land_cmd.request.latitude = 0;
@@ -185,7 +167,7 @@ api::api(int argc, char **argv)
 
     set_point_raw.coordinate_frame = 1;
     set_point_raw.type_mask = 0;
-    set_point_raw.yaw = 1.5708;
+    set_point_raw.yaw = 1.5708; // initial yaw
     set_point_raw.yaw_rate = .1;
 }
 
@@ -327,12 +309,12 @@ void api::set_point(float x, float y , float z){
     setpoint_position.pose.position.y = current_position.pose.position.y + y;
     setpoint_position.pose.position.z = current_position.pose.position.z + z;
     #ifdef DEBUG
-    ROS_INFO("setpoint_position position x: %lf",setpoint_position.pose.position.x);
-    ROS_INFO("setpoint_position position y: %lf",setpoint_position.pose.position.y);
-    ROS_INFO("setpoint_position position z: %lf\n",setpoint_position.pose.position.z);
-    ROS_INFO("current_position position x: %lf",current_position.pose.position.x);
-    ROS_INFO("current_position position y: %lf",current_position.pose.position.y);
-    ROS_INFO("current_position position z: %lf\n",current_position.pose.position.z);
+    // ROS_INFO("setpoint_position position x: %lf",setpoint_position.pose.position.x);
+    // ROS_INFO("setpoint_position position y: %lf",setpoint_position.pose.position.y);
+    // ROS_INFO("setpoint_position position z: %lf\n",setpoint_position.pose.position.z);
+    // ROS_INFO("current_position position x: %lf",current_position.pose.position.x);
+    // ROS_INFO("current_position position y: %lf",current_position.pose.position.y);
+    // ROS_INFO("current_position position z: %lf\n",current_position.pose.position.z);
     #endif
 }
 void api::set_point_2(float x, float y , float z){
@@ -340,12 +322,12 @@ void api::set_point_2(float x, float y , float z){
     setpoint_position.pose.position.y += y;
     setpoint_position.pose.position.z += z;
     #ifdef DEBUG
-    ROS_INFO("setpoint_position position x: %lf",setpoint_position.pose.position.x);
-    ROS_INFO("setpoint_position position y: %lf",setpoint_position.pose.position.y);
-    ROS_INFO("setpoint_position position z: %lf\n",setpoint_position.pose.position.z);
-    ROS_INFO("current_position position x: %lf",current_position.pose.position.x);
-    ROS_INFO("current_position position y: %lf",current_position.pose.position.y);
-    ROS_INFO("current_position position z: %lf\n",current_position.pose.position.z);
+    // ROS_INFO("setpoint_position position x: %lf",setpoint_position.pose.position.x);
+    // ROS_INFO("setpoint_position position y: %lf",setpoint_position.pose.position.y);
+    // ROS_INFO("setpoint_position position z: %lf\n",setpoint_position.pose.position.z);
+    // ROS_INFO("current_position position x: %lf",current_position.pose.position.x);
+    // ROS_INFO("current_position position y: %lf",current_position.pose.position.y);
+    // ROS_INFO("current_position position z: %lf\n",current_position.pose.position.z);
     #endif
 }
 void api::set_point_NED (float x, float y , float z){
@@ -384,12 +366,14 @@ void api::set_home(){
     home.pose.orientation.w = -1;//current_position.pose.orientation.w;
     // home = current_position;
     #ifdef DEBUG
-    ROS_INFO("home position x: %lf",home.pose.position.x);
-    ROS_INFO("home position y: %lf",home.pose.position.y);
-    ROS_INFO("home position z: %lf\n",home.pose.position.z);
-    ROS_INFO("current_position position x: %lf",current_position.pose.position.x);
-    ROS_INFO("current_position position y: %lf",current_position.pose.position.y);
-    ROS_INFO("current_position position z: %lf\n",current_position.pose.position.z);
+    ROS_INFO_STREAM("home position: " << home);
+    ROS_INFO_STREAM("current position: " << current_position);
+    // ROS_INFO("home position x: %lf",home.pose.position.x);
+    // ROS_INFO("home position y: %lf",home.pose.position.y);
+    // ROS_INFO("home position z: %lf\n",home.pose.position.z);
+    // ROS_INFO("current_position position x: %lf",current_position.pose.position.x);
+    // ROS_INFO("current_position position y: %lf",current_position.pose.position.y);
+    // ROS_INFO("current_position position z: %lf\n",current_position.pose.position.z);
     #endif
     
 }
@@ -409,19 +393,6 @@ bool api::reached_point_NED(){
     return  sqrt (dx * dx + dy * dy + dz * dz)  < dest_threshold;
 }
 
-void api::set_velocity(float x, float y, float z){
-    set_vel.linear.x = x;
-    set_vel.linear.y = y;
-    set_vel.linear.z = z;
-    set_vel_pub.publish(set_vel);
-}
-
-void api::set_acceleration(float x, float y, float z){
-    set_accel.vector.x = x;
-    set_accel.vector.y = y;
-    set_accel.vector.z = z;
-    set_accel_pub.publish(set_accel);
-}
 
 void api::set_timer(double delta){
     dt = ros::Duration(delta);
@@ -441,4 +412,12 @@ void api::land(){
 
 void api::set_attitude(float yaw){
     set_point_raw.yaw += yaw;
+}
+
+/*
+* helper function to get current position
+*/
+void api::get_position(){
+    position = current_position;
+    tf::Matrix3x3(current_position.orientation).getRPY(roll, pitch, yaw); //extract roll pitch yaw from current position
 }
