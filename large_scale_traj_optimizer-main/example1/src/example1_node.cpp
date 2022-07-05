@@ -11,6 +11,8 @@
 
 #include <ros/ros.h>
 
+#include <fstream>
+
 using namespace std;
 using namespace ros;
 using namespace Eigen;
