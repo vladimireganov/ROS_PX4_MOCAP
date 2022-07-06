@@ -108,7 +108,7 @@ int main(int argc, char **argv)
     fS.setZero();
     Vector3d zeroVec(0.0, 0.0, 0.0);
     Rate lp(1000);
-    int groupSize = 100;
+    int groupSize = 1;
 
     std::chrono::high_resolution_clock::time_point tc0, tc1, tc2;
     double d0, d1;

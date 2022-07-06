@@ -6,28 +6,13 @@
 using namespace std;
 using namespace Eigen;
 
-class Data
-{
-private:
-    /* data */
+#include  "data.hpp"
 
-public:
-    int iteration; // number of iteration
-    double time; // time
-    Eigen::Vector3d position;
-    Eigen::Vector3d velocity;
-    Eigen::Vector3d acceleration;
-
-    Data(/* args */);
-    ~Data();
-};
 
 
 class File_write
 {
 private:
-    /* data */
-    //string data_test; //testing git push
     string name_of_the_file;
     string log_file_name;
     ofstream data_file;
@@ -51,20 +36,20 @@ File_write::File_write(/* args */)
 {   
     name_of_the_file = "data.csv";
     log_file_name = "log.txt";
-    //add choosing names for files
+
 }
 File_write::File_write(string name)
 {   
     name_of_the_file = name + ".csv";
     log_file_name = name + "_log.txt";
-    //add choosing names for files
+
 }
 File_write::File_write(string name,Data& data )
 {   
     name_of_the_file = name + ".csv";
     log_file_name = name + "_log.txt";
     my_data = &data;
-    //add choosing names for files
+
 }
 
 File_write::~File_write()
@@ -117,8 +102,6 @@ void File_write::save_data(){ // prints data into the file
     data_file << my_data->acceleration[2];
 
     data_file << "\n";
-
-    // processed data
 
     data_file.flush();
     // data_file.close();
