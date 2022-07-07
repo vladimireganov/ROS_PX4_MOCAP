@@ -10,6 +10,12 @@
 #include "api.h"
 #include <string>
 
+/*
+* add file write
+* Syncronization?
+* Will be performed via logging time from header
+*/
+
 namespace log_data{
 
 static void state_cb(const mavros_msgs::State::ConstPtr& msg); //callback function for current state

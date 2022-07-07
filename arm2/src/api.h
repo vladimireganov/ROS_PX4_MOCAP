@@ -129,6 +129,8 @@ public:
 
     void set_point_NED_global(float x, float y);
     void set_point_NED_global(float x, float y, float z);
+
+    void get_position_ret(float &x,float &y,float &z,float &yaw ); // function for sending position and orientation to the user
     /// experimental finish
 };
 
@@ -340,7 +342,7 @@ void api::set_point_2(float x, float y , float z){
 void api::set_point_NED (float x, float y , float z){
     set_point_raw.position.x += x;
     set_point_raw.position.y += y;
-    set_point_raw.position.z -= z;
+    set_point_raw.position.z += z;
     #ifdef DEBUG
 
     #endif
@@ -365,7 +367,7 @@ void api::set_point_NED(float x, float y){
 void api::set_point_NED_global(float x, float y, float z){
     set_point_raw.position.x = x;
     set_point_raw.position.y = y;
-    set_point_raw.position.y = z;
+    set_point_raw.position.z = z;
 }
 void api::set_point_NED_global(float x, float y){
     set_point_raw.position.x = x;
