@@ -126,6 +126,9 @@ public:
     void set_heading_offset(float yaw); // function to set yaw as offset to current
     void set_heading_global(float yaw); // function to set yaw
     void init_heading(); // set point heading as current heading
+
+    void set_point_NED_global(float x, float y);
+    void set_point_NED_global(float x, float y, float z);
     /// experimental finish
 };
 
@@ -359,6 +362,17 @@ void api::set_point_NED(float x, float y){
     set_point_raw.position.y += y;
 }
 
+void api::set_point_NED_global(float x, float y, float z){
+    set_point_raw.position.x = x;
+    set_point_raw.position.y = y;
+    set_point_raw.position.y = z;
+}
+void api::set_point_NED_global(float x, float y){
+    set_point_raw.position.x = x;
+    set_point_raw.position.y = y;
+}
+
+
 
 void api::set_home(){
     home.pose.position.x = current_position.pose.position.x;
@@ -435,4 +449,20 @@ void api::get_position(){
     tf2::Quaternion q;
     tf2::fromMsg(current_position.pose.orientation,q);
     tf2::Matrix3x3(q).getRPY(roll, pitch, yaw); //extract roll pitch yaw from current position
+}
+
+/*
+* helper function to extract current position
+* receives pointer where to extract data
+*/
+void api::get_position_ret(float &x,float &y,float &z,float &yaw ){
+    position = current_position;
+    // tf2::Matrix3x3().getRPY(roll, pitch, yaw);
+    tf2::Quaternion q;
+    tf2::fromMsg(current_position.pose.orientation,q);
+    tf2::Matrix3x3(q).getRPY(this.roll, this.pitch, this.yaw); //extract roll pitch yaw from current position
+    x = position.pose.pose.x;
+    y = position.pose.pose.y;
+    z = position.pose.pose.z;
+    yaw = this.yaw;
 }
