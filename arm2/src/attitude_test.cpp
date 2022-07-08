@@ -26,11 +26,12 @@ int main(int argc, char **argv){
     // my_drone.set_home(); //
     my_drone.refresh_set_point_NED(); // init set_point to current state
     my_drone.get_position_ret(x,y,z,yaw);
-
+    ROS_INFO_STREAM("yaw: " << yaw);
+    // ROS_INFO_STREAM("current position: " << current_position);
     my_drone.get_position();
     my_drone.init_heading();
     my_drone.set_heading_global(yaw);
-
+    my_drone.take_off_NED(-1);
     for (int i = 0; i < 100; i++) // send a few initial set points before continueing
     {
         my_drone.march_NED(); ///send cmds

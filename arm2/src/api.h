@@ -175,9 +175,9 @@ api::api(int argc, char **argv)
     dest_threshold = .1;
 
     set_point_raw.coordinate_frame = 1;
-    set_point_raw.type_mask = 0;
+    set_point_raw.type_mask = 2048;
     set_point_raw.yaw = 1.5708; // initial yaw
-    set_point_raw.yaw_rate = .1;
+    set_point_raw.yaw_rate = 0;
 }
 
 api::~api()
@@ -260,7 +260,9 @@ void api::take_off_2(float altitude){
     setpoint_position.pose.position.z += altitude;
 }
 void api::take_off_NED(float altitude){
-    set_point_raw.position.z += altitude;
+    set_point_raw.position.z -= altitude;
+    ROS_INFO_STREAM("altitude: " << altitude);
+    ROS_INFO_STREAM("target altitude: " << set_point_raw.position.z);
 }
 
 /*

@@ -49,7 +49,7 @@ int main(int argc, char **argv){
     }
     ROS_INFO("Take off completed\n");
 
-    my_drone.set_heading_offset(1.57);
+    // my_drone.set_heading_offset(1.57);
     ROS_INFO("Rotate\n");
     my_drone.set_timer(5.0);
     while ( ! my_drone.check_timer() &&ros::ok()){my_drone.march_NED();}

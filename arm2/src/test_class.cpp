@@ -27,7 +27,7 @@ int main(int argc, char **argv){
     my_drone.init_heading();
 
     my_drone.get_position_ret(x,y,z,yaw);
-
+     my_drone.set_heading_global(yaw);
     for (int i = 0; i < 100; i++) // send a few initial set points before continueing
     {
         my_drone.march_NED(); ///send cmds
@@ -42,8 +42,8 @@ int main(int argc, char **argv){
     }
     ROS_INFO("Take off completed\n");
 
-    my_drone.set_heading_offset(1.57);
-    ROS_INFO("Rotate\n");
+    my_drone.set_heading_offset(0);
+    // ROS_INFO("Rotate\n");
     my_drone.set_timer(5.0);
     while ( ! my_drone.check_timer() &&ros::ok()){my_drone.march_NED();}
 

@@ -13,6 +13,8 @@
 
 #include "file_write.hpp"
 
+// #include "file_read.hpp"
+
 using namespace std;
 using namespace ros;
 using namespace Eigen;
@@ -116,6 +118,11 @@ int main(int argc, char **argv)
     // for (int i = 2; i <= 128 && ok(); i++)
     // {
         d0 = d1 = 0.0;
+    // File_read test("/home/ros/test/src/large_scale_traj_optimizer-main/example1/src/trajectory.csv");
+
+    // route = test.read_all_data();
+
+    
         // for (int j = 0; j < groupSize && ok(); j++)
         // {
             route = routeGen.generate(N);
@@ -191,10 +198,11 @@ int main(int argc, char **argv)
             // std::cout ;
         }
         Data min_snap_data;
-        Data min_jerk_data;
+        // Data min_jerk_data;
 
-        File_write min_snap_file = File_write("snap",min_snap_data);
-        File_write min_jerk_file = File_write("jerk",min_jerk_data);
+        File_write min_snap_file ("snap");// = File_write();
+        min_snap_file.connect_data(min_snap_data);
+        // File_write min_jerk_file = File_write("jerk", min_jerk_data);
 
         min_snap_file.create_table_names();
         for (double i = 0; i < minSnapTraj.getTotalDuration(); i+= 0.1){ //discretization time

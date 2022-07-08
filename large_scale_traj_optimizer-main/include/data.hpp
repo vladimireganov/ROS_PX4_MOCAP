@@ -10,14 +10,14 @@ private:
     /* data */
 
 public:
-    int iteration; // number of iteration
+    int iteration = 0; // number of iteration
     double time; // time
     Eigen::Vector3d position;
     Eigen::Vector3d velocity;
     Eigen::Vector3d acceleration;
 
-    Data(/* args */);
-    ~Data();
+    // Data(/* args */);
+    // ~Data();
 };
 
 class Data_read
@@ -26,12 +26,12 @@ private:
     /* data */
 
 public:
-    int iteration; // number of iteration
-    double time; // time
+    // int iteration; // number of iteration
+    // double time; // time
     Eigen::Vector3d position;
-    Eigen::Vector3d velocity;
-    Eigen::Vector3d acceleration;
+    // Eigen::Vector3d velocity;
+    // Eigen::Vector3d acceleration;
 
-    Data(/* args */);
-    ~Data();
+    // Data_read(/* args */);
+    // ~Data_read();
 };
