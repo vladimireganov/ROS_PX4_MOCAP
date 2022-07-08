@@ -11,10 +11,6 @@
 
 #include <ros/ros.h>
 
-#include "file_write.hpp"
-
-#include "file_read.hpp"
-
 using namespace std;
 using namespace ros;
 using namespace Eigen;
@@ -110,22 +106,17 @@ int main(int argc, char **argv)
     fS.setZero();
     Vector3d zeroVec(0.0, 0.0, 0.0);
     Rate lp(1000);
-    int groupSize = 1;
+    int groupSize = 100;
 
     std::chrono::high_resolution_clock::time_point tc0, tc1, tc2;
     double d0, d1;
-    int N = 5;
+    int N = 10;
     // for (int i = 2; i <= 128 && ok(); i++)
     // {
         d0 = d1 = 0.0;
-    File_read test("/home/ros/test/src/large_scale_traj_optimizer-main/example1/src/trajectory.csv");
-
-    route = test.read_all_data();
-
-    
         // for (int j = 0; j < groupSize && ok(); j++)
         // {
-            // route = routeGen.generate(N);
+            route = routeGen.generate(N);
             iS.col(0) << route.leftCols<1>();
             fS.col(0) << route.rightCols<1>();
             ts = allocateTime(route, 3.0, 3.0);
@@ -196,26 +187,8 @@ int main(int argc, char **argv)
             std::cout << "at time: " << i << "\t" <<minSnapTraj.getPos(i) << "\n";
             // std::cout ;
             // std::cout ;
+
         }
-        Data min_snap_data;
-        // Data min_jerk_data;
-
-        File_write min_snap_file ("snap");// = File_write();
-        min_snap_file.connect_data(min_snap_data);
-        // File_write min_jerk_file = File_write("jerk", min_jerk_data);
-
-        min_snap_file.create_table_names();
-        for (double i = 0; i < minSnapTraj.getTotalDuration(); i+= 0.1){ //discretization time
-            min_snap_data.time = i;
-            min_snap_data.iteration++;
-            min_snap_data.position = minSnapTraj.getPos(i);
-            min_snap_data.velocity = minSnapTraj.getVel(i);
-            min_snap_data.acceleration = minSnapTraj.getAcc(i);
-            min_snap_file.save_data();
-        }
-        min_snap_file.close_files();
-
-
 
         ros::spinOnce();
         lp.sleep();

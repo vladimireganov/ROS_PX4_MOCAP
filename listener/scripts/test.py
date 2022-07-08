@@ -26,15 +26,15 @@ class test:
 			# z -> -z
 			#
 			self.temp = data.pose.position.y
-			# self.pose_to_send.header = data.header
+			self.pose_to_send.header = data.header
 			self.pose_to_send.pose.position.x = data.pose.position.x
 			self.pose_to_send.pose.position.y = data.pose.position.z
 			self.pose_to_send.pose.position.z = -self.temp
 			self.temp = data.pose.orientation.y
 			self.temp2 = data.pose.orientation.z
 			self.pose_to_send.pose.orientation.y = self.temp2
-			self.pose_to_send.pose.orientation.x = -data.pose.orientation.x
-			self.pose_to_send.pose.orientation.z = self.temp
+			self.pose_to_send.pose.orientation.x = data.pose.orientation.x
+			self.pose_to_send.pose.orientation.z = -self.temp
 			self.pose_to_send.pose.orientation.w = data.pose.orientation.w
 
 			rospy.loginfo(rospy.get_caller_id() + "%s", self.pose_to_send)
@@ -42,7 +42,7 @@ class test:
 
 			self.br.sendTransform((self.pose_to_send.pose.position.x,self.pose_to_send.pose.position.y,self.pose_to_send.pose.position.z),
 				(self.pose_to_send.pose.orientation.x,self.pose_to_send.pose.orientation.y,
-				self.pose_to_send.pose.orientation.z,-self.pose_to_send.pose.orientation.w),
+				self.pose_to_send.pose.orientation.z,self.pose_to_send.pose.orientation.w),
 				rospy.Time.now(),"base_link","world")
 			self.rate.sleep()
 		self.counter +=1

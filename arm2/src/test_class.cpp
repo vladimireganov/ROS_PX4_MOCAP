@@ -24,7 +24,7 @@ int main(int argc, char **argv){
     my_drone.refresh_set_point_NED(); // init set_point to current state
     
     my_drone.get_position();
-    my_drone.init_heading();
+    // my_drone.init_heading();
 
     my_drone.get_position_ret(x,y,z,yaw);
      my_drone.set_heading_global(yaw);
@@ -37,41 +37,37 @@ int main(int argc, char **argv){
     ROS_INFO("Take off\n");
     my_drone.take_off_NED(-1); // go .5 m up
     my_drone.set_heading_offset(0);
-    while(ros::ok() && !my_drone.reached_point_NED()){ //while loop for main program
-        my_drone.march_NED();//spin code (publish set points)
-    }
+    my_drone.set_timer(4.0);
+    while ( ! my_drone.check_timer() &&ros::ok()){my_drone.march_NED();}
     ROS_INFO("Take off completed\n");
 
     my_drone.set_heading_offset(0);
     // ROS_INFO("Rotate\n");
-    my_drone.set_timer(5.0);
+    my_drone.set_timer(2.0);
     while ( ! my_drone.check_timer() &&ros::ok()){my_drone.march_NED();}
 
     my_drone.set_point_NED_global(1,0);
     my_drone.set_heading_offset(0);
-    while(ros::ok() && !my_drone.reached_point_NED()){ //while loop for main program
-        my_drone.march_NED();//spin code (publish set points)
-    }
+    my_drone.set_timer(2.0);
+    while ( ! my_drone.check_timer() &&ros::ok()){my_drone.march_NED();}
+
     ROS_INFO("Reached first point:\n");
     my_drone.set_point_NED_global(1,1);
     my_drone.set_heading_offset(0);
-    while(ros::ok() && !my_drone.reached_point_NED()){ //while loop for main program
-        my_drone.march_NED();//spin code (publish set points)
-    }
+    my_drone.set_timer(2.0);
+    while ( ! my_drone.check_timer() &&ros::ok()){my_drone.march_NED();}
     ROS_INFO("Reached second point:\n");
 
     my_drone.set_point_NED_global(0,1);
     my_drone.set_heading_offset(0);
-    while(ros::ok() && !my_drone.reached_point_NED()){ //while loop for main program
-        my_drone.march_NED();//spin code (publish set points)
-    }
+    my_drone.set_timer(2.0);
+    while ( ! my_drone.check_timer() &&ros::ok()){my_drone.march_NED();}
     ROS_INFO("Reached third point:\n");
 
     my_drone.set_point_NED_global(0,0);
     my_drone.set_heading_offset(0);
-    while(ros::ok() && !my_drone.reached_point_NED()){ //while loop for main program
-        my_drone.march_NED();//spin code (publish set points)
-    }
+    my_drone.set_timer(2.0);
+    while ( ! my_drone.check_timer() &&ros::ok()){my_drone.march_NED();}
     ROS_INFO("Reached third point:\n");
 
     my_drone.landing(); // intializes landing procedure

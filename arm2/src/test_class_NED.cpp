@@ -21,16 +21,18 @@ int main(int argc, char **argv){
     ros::init(argc, argv, "offb_node"); // needed to init ros node
 
     api my_drone = api(argc, argv); //initialize class to work with drone
+    float x,y,z,yaw;
     
     // my_drone.set_home(); //
     my_drone.refresh_set_point_NED(); // init set_point to current state
     
     my_drone.get_position();
-    my_drone.init_heading();
+    // my_drone.init_heading();
     // my_drone.take_off_NED(1);
     // my_drone.set_attitude(0,0,0);
     // my_drone.refresh_set_point();
-
+    my_drone.get_position_ret(x,y,z,yaw);
+    my_drone.set_heading_global(yaw);
     // my_drone.take_off_2(1);
     for (int i = 0; i < 100; i++) // send a few initial set points before continueing
     {
