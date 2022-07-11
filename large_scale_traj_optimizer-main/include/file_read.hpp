@@ -1,5 +1,6 @@
 #include <Eigen/Eigen>
 
+
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -44,7 +45,7 @@ MatrixXd File_read::read_all_data(){
         while (std::getline(data_file,line))                                                                                                                                          
         {   
             std::istringstream line_s(line);
-            std::cout << "start of conversion";
+            // std::cout << "start of conversion";
             std::getline(line_s, item, ',');
             std::cout << item;
             point[0]= std::stod(item.c_str(),NULL);

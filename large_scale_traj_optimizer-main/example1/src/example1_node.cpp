@@ -1,5 +1,6 @@
 #include "traj_min_jerk.hpp"
 #include "traj_min_snap.hpp"
+#include <Eigen/Dense>
 
 #include <chrono>
 
@@ -114,14 +115,17 @@ int main(int argc, char **argv)
 
     std::chrono::high_resolution_clock::time_point tc0, tc1, tc2;
     double d0, d1;
-    int N = 5;
+    // int N = 5;
     // for (int i = 2; i <= 128 && ok(); i++)
     // {
         d0 = d1 = 0.0;
     File_read test("/home/ros/test/src/large_scale_traj_optimizer-main/example1/src/trajectory.csv");
 
     route = test.read_all_data();
-
+    // std::cout << "Getting rows: \n" << "\n";
+    int N = (int) (route.cols()) -1;
+    std::cout << N << "\n";
+    // std::cout << "continue: \n" << "\n";
     
         // for (int j = 0; j < groupSize && ok(); j++)
         // {
