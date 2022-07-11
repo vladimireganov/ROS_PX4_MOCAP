@@ -153,7 +153,7 @@ api::api(int argc, char **argv)
     state_sub = nh.subscribe<mavros_msgs::State>
             ("mavros/state", 10, state_cb);
     // subcribe to px4 position
-    pos = nh.subscribe<geometry_msgs::PoseStamped>("/mavros/vision_pose/pose",10,get_pos);// subsribe to topi with proper coordinate system
+    pos = nh.subscribe<geometry_msgs::PoseStamped>("/mavros/vision_pose/pose",1,get_pos);// subsribe to topi with proper coordinate system
 
     local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>
             ("mavros/setpoint_position/local", 10);
@@ -178,6 +178,9 @@ api::api(int argc, char **argv)
     set_point_raw.type_mask = 2048;
     set_point_raw.yaw = 1.5708; // initial yaw
     set_point_raw.yaw_rate = 0;
+    // set_point_raw.header.frame_id = "base_link";//"base_link";
+    ros::spinOnce();
+    rate.sleep();
 }
 
 api::~api()
@@ -196,6 +199,7 @@ void state_cb(const mavros_msgs::State::ConstPtr& msg){
 */
 void get_pos(const geometry_msgs::PoseStamped::ConstPtr& msg){
     current_position = *msg;
+    // ROS_INFO_STREAM("current_position: " << current_position);
 }
 /*
     * function to arm the drone
@@ -304,6 +308,7 @@ void api::refresh_set_point_NED(){
     set_point_raw.position.x = current_position.pose.position.x;
     set_point_raw.position.y = current_position.pose.position.y;
     set_point_raw.position.z = current_position.pose.position.z;
+    ROS_INFO_STREAM("target altitude: " << current_position);
     // setpoint_position = current_position;
     // set_point_raw.pose.position.x = current_position.pose.position.x;
     // set_point_raw.pose.position.y = current_position.pose.position.y;
