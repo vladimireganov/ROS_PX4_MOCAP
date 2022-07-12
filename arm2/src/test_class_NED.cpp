@@ -85,6 +85,8 @@ int main(int argc, char **argv){
     ROS_INFO("Landed:\n");
     my_drone.disarm();
 
+    my_drone.logger.close_files();
+
 
 
 

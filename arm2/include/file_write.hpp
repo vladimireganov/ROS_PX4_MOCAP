@@ -25,22 +25,23 @@
 
 using namespace std;
 
-#include  "data.hpp"
 
 
 
 class File_write
 {
 private:
-    string name_of_the_file;
-    string log_file_name;
 
     ofstream PoseStamped_log;
     string PoseStamped_file_name;
     ofstream PositionTarget_log;
     string PositionTarget_file_name;
     ofstream State_log;
-    string State_file_name;
+    string State_file;
+        
+    // Data* my_data;
+    // Data* my_data;
+    // Data* my_data;
 
 public:
     File_write(/* args */){
@@ -69,7 +70,6 @@ public:
 
     void close_files();
 
-    Data* my_data;
 };
 
 
@@ -97,7 +97,7 @@ void File_write::save_data(geometry_msgs::PoseStamped &Data){ // prints data int
 
     PoseStamped_log << "\n";
 
-    data_file.flush();
+    PoseStamped_log.flush();
     // std::cout << "saving";
     // data_file.close();
 }
@@ -137,7 +137,7 @@ void File_write::save_data(mavros_msgs::PositionTarget &Data){ // prints data in
 
     PositionTarget_log << "\n";
 
-    data_file.flush();
+    PositionTarget_log.flush();
     // std::cout << "saving";
     // data_file.close();
 }
@@ -166,15 +166,20 @@ void File_write::save_data(mavros_msgs::State &Data){ // prints data into the fi
 
     State_log << "\n";
 
-    data_file.flush();
+    State_log.flush();
     // std::cout << "saving";
     // data_file.close();
 }
 
 
 void File_write::close_files(){
-    data_file.flush();
-    data_file.close();
+    State_log.flush();
+    State_log.close();
+    PositionTarget_log.flush();
+    PositionTarget_log.close();
+    PoseStamped_log.flush();
+    PoseStamped_log.close();
+
 }
 
 void File_write::create_table_names(geometry_msgs::PoseStamped &Data){ //prints name of the columns in the csv file
