@@ -7,7 +7,7 @@
 #include <mavros_msgs/State.h>
 
 
-#include "api.h"
+#include "api.hpp"
 #include <string>
 ///
 /*
@@ -22,7 +22,12 @@ int main(int argc, char **argv){
 
     api my_drone = api(argc, argv); //initialize class to work with drone
     float x,y,z,yaw;
+    while (!firstDataFlag){
+        ros::spinOnce();
+    }
     
+    my_drone.arm(); // try to arm
+    my_drone.set_mode(std::string("OFFBOARD")); //try to transition into offboard mode
     // my_drone.set_home(); //
     my_drone.refresh_set_point_NED(); // init set_point to current state
     
@@ -36,8 +41,7 @@ int main(int argc, char **argv){
         my_drone.march_NED(); ///send cmds
     }
 
-    my_drone.arm(); // try to arm
-    my_drone.set_mode(std::string("OFFBOARD")); //try to transition into offboard mode
+    
     ROS_INFO("Take off\n");
     my_drone.take_off_NED(-1); // go .5 m up
     my_drone.set_heading_offset(0);
@@ -77,7 +81,7 @@ int main(int argc, char **argv){
     }
     ROS_INFO("Reached third point:\n");
 
-    my_drone.landing();
+    // my_drone.landing();
     my_drone.land();
 
     my_drone.set_timer(5.0);
@@ -85,7 +89,7 @@ int main(int argc, char **argv){
     ROS_INFO("Landed:\n");
     my_drone.disarm();
 
-    my_drone.logger.close_files();
+    logger.close_files();
 
 
 

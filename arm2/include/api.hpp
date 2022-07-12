@@ -32,8 +32,9 @@ static void get_pos(const geometry_msgs::PoseStamped::ConstPtr& msg); // callbac
 static mavros_msgs::State current_state;
 static geometry_msgs::PoseStamped current_position;
 
-File_write logger();
+File_write logger;
 
+bool firstDataFlag = false;
 
 class api
 {
@@ -55,7 +56,7 @@ private:
 
     /* data */
     
-    ros::Rate rate = ros::Rate(30.0); // update frequency
+    ros::Rate rate = ros::Rate(40.0); // update frequency
     
     mavros_msgs::CommandBool arm_cmd; //variable for arming
 
@@ -186,9 +187,9 @@ api::api(int argc, char **argv)
     ros::spinOnce();
     rate.sleep();
 
-    logger.create_table_names(&current_position);
-    logger.create_table_names(&current_state);
-    logger.create_table_names(&set_point_raw);
+    logger.create_table_names(current_position);
+    logger.create_table_names(current_state);
+    logger.create_table_names(set_point_raw);
 }
 
 api::~api()
@@ -200,7 +201,7 @@ api::~api()
 */
 void state_cb(const mavros_msgs::State::ConstPtr& msg){
     current_state = *msg;
-    logger.save_data(&current_state);
+    logger.save_data(current_state);
     // ROS_INFO("%f\n",current_state);
 }
 /*
@@ -208,7 +209,9 @@ void state_cb(const mavros_msgs::State::ConstPtr& msg){
 */
 void get_pos(const geometry_msgs::PoseStamped::ConstPtr& msg){
     current_position = *msg;
-    logger.save_data(&current_position);
+    firstDataFlag = true;
+    //ROS_INFO("Position updated");
+    logger.save_data(current_position);
     // ROS_INFO_STREAM("current_position: " << current_position);
 }
 /*
@@ -219,7 +222,7 @@ bool api::arm(){
     arm_cmd.request.value = true;
     if( arming_client.call(arm_cmd) && arm_cmd.response.success){
         ROS_INFO("Vehicle armed");
-        logger.save_data(&current_state);
+        logger.save_data(current_state);
         return true;
     }
     else return false;
@@ -233,7 +236,7 @@ bool api::disarm(){
     arm_cmd.request.value = false;
     if( arming_client.call(arm_cmd) && arm_cmd.response.success){
         ROS_INFO("Vehicle disarmed");
-        logger.save_data(&current_state);
+        logger.save_data(current_state);
         return true;
     }
     else return false;
@@ -270,7 +273,7 @@ bool api::set_mode(std::string mode){
     if( set_mode_client.call(offb_set_mode) &&
                 offb_set_mode.response.mode_sent){
                 ROS_INFO("Offboard enabled");
-                logger.save_data(&current_state);
+                logger.save_data(current_state);
                 return true;
     }
     else{
@@ -287,14 +290,15 @@ void api::take_off_NED(float altitude){
     set_point_raw.position.z -= altitude;
     ROS_INFO_STREAM("altitude: " << altitude);
     ROS_INFO_STREAM("target altitude: " << set_point_raw.position.z);
-    logger.save_data(&current_state);
+    logger.save_data(current_state);
 }
 
 
 
 void api::march_NED(){
+    set_point_raw.header.stamp = ros::Time::now();
     set_point_raw_pub.publish(set_point_raw);
-    logger.save_data(&set_point_raw);
+    logger.save_data(set_point_raw);
     ros::spinOnce();
     rate.sleep();
 }
@@ -305,7 +309,9 @@ void api::refresh_set_point_NED(){
     set_point_raw.position.x = current_position.pose.position.x;
     set_point_raw.position.y = current_position.pose.position.y;
     set_point_raw.position.z = current_position.pose.position.z;
-    ROS_INFO_STREAM("target altitude: " << current_position);
+    ROS_INFO_STREAM("current_position: " << current_position);
+    logger.save_data(set_point_raw);
+    logger.save_data(current_position);
 
 }
 
@@ -326,19 +332,19 @@ void api::set_point_NED (float x, float y , float z){
 void api::set_point_NED(float x, float y){
     set_point_raw.position.x += x;
     set_point_raw.position.y -= y;
-    logger.save_data(&set_point_raw);
+    logger.save_data(set_point_raw);
 }
 
 void api::set_point_NED_global(float x, float y, float z){
     set_point_raw.position.x = x;
     set_point_raw.position.y = -y;
     set_point_raw.position.z = -z;
-    logger.save_data(&set_point_raw);
+    logger.save_data(set_point_raw);
 }
 void api::set_point_NED_global(float x, float y){
     set_point_raw.position.x = x;
     set_point_raw.position.y = -y;
-    logger.save_data(&set_point_raw);
+    logger.save_data(set_point_raw);
 }
 
 
@@ -352,7 +358,7 @@ void api::set_home(){
     home.pose.orientation.z = 0;//current_position.pose.orientation.z;
     home.pose.orientation.w = -1;//current_position.pose.orientation.w;
     // home = current_position;
-    logger.save_data(&current_position);
+    logger.save_data(current_position);
     #ifdef DEBUG
     ROS_INFO_STREAM("home position: " << home);
     ROS_INFO_STREAM("current position: " << current_position);
@@ -374,8 +380,8 @@ bool api::reached_point_NED(){
     float dy = set_point_raw.position.y - current_position.pose.position.y ;
     float dz = set_point_raw.position.z - current_position.pose.position.z ;
     #ifdef DEBUG
-    ROS_INFO_STREAM("set point: " << set_point_raw);
-    ROS_INFO_STREAM("current position: " << current_position);
+    // ROS_INFO_STREAM("set point: " << set_point_raw);
+    // ROS_INFO_STREAM("current position: " << current_position);
     #endif
     // logger.save_data(&current_position);
     return  sqrt (dx * dx + dy * dy + dz * dz)  < dest_threshold;
@@ -395,7 +401,7 @@ bool api::check_timer(){
 
 void api::land(){
     land_client.call(land_cmd);
-    logger.save_data(&current_state);
+    logger.save_data(current_state);
 
 }
 

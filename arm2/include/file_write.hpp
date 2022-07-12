@@ -37,7 +37,7 @@ private:
     ofstream PositionTarget_log;
     string PositionTarget_file_name;
     ofstream State_log;
-    string State_file;
+    string State_file_name;
         
     // Data* my_data;
     // Data* my_data;
@@ -46,14 +46,14 @@ private:
 public:
     File_write(/* args */){
         PoseStamped_file_name = "position.csv";
-        PositionTarget_log = "target_position.csv";
-        PoseStamped_file_name = "state.csv";
+        PositionTarget_file_name = "target_position.csv";
+        State_file_name = "state.csv";
     }
 
     // File_write(string name,Data& data );
 
     ~File_write();
-    void connect_data(Data& data);
+    
 
     void write_to_file();
     void create_table_names();
@@ -82,18 +82,18 @@ File_write::~File_write()
 void File_write::save_data(geometry_msgs::PoseStamped &Data){ // prints data into the file
     // data_file.open(name_of_the_file);
 
-    PoseStamped_log << Data->header->seq << ",";
-    PoseStamped_log << Data->header->frame_id << ",";
-    PoseStamped_log << Data->header->stamp << ",";
+    PoseStamped_log << Data.header.seq << ",";
+    PoseStamped_log << Data.header.frame_id << ",";
+    PoseStamped_log << Data.header.stamp << ",";
 
-    PoseStamped_log << Data->pose->position->x << ",";
-    PoseStamped_log << Data->pose->position->y << ",";
-    PoseStamped_log << Data->pose->position->z << ",";
+    PoseStamped_log << Data.pose.position.x << ",";
+    PoseStamped_log << Data.pose.position.y << ",";
+    PoseStamped_log << Data.pose.position.z << ",";
 
-    PoseStamped_log << Data->pose->orientation->x << ",";
-    PoseStamped_log << Data->pose->orientation->y << ",";
-    PoseStamped_log << Data->pose->orientation->z << ",";
-    PoseStamped_log << Data->pose->orientation->w ;
+    PoseStamped_log << Data.pose.orientation.x << ",";
+    PoseStamped_log << Data.pose.orientation.y << ",";
+    PoseStamped_log << Data.pose.orientation.z << ",";
+    PoseStamped_log << Data.pose.orientation.w ;
 
     PoseStamped_log << "\n";
 
@@ -114,26 +114,26 @@ void File_write::save_data(mavros_msgs::PositionTarget &Data){ // prints data in
     float32 yaw
     float32 yaw_rate
     */
-    PositionTarget_log << Data->header->seq << ",";
-    PositionTarget_log << Data->header->frame_id << ",";
-    PositionTarget_log << Data->header->stamp << ",";
+    PositionTarget_log << Data.header.seq << ",";
+    PositionTarget_log << Data.header.frame_id << ",";
+    PositionTarget_log << Data.header.stamp << ",";
 
-    PositionTarget_log << Data->position->x << ","; //position
-    PositionTarget_log << Data->position->y << ",";
-    PositionTarget_log << Data->position->z << ",";
+    PositionTarget_log << Data.position.x << ","; //position
+    PositionTarget_log << Data.position.y << ",";
+    PositionTarget_log << Data.position.z << ",";
 
-    PositionTarget_log << Data->yaw << ",";
-    PositionTarget_log << Data->yaw_rate << ",";
+    PositionTarget_log << Data.yaw << ",";
+    PositionTarget_log << Data.yaw_rate << ",";
 
-    PositionTarget_log << Data->velocity->x << ","; //velocity
-    PositionTarget_log << Data->velocity->y << ",";
-    PositionTarget_log << Data->velocity->z << ",";
+    PositionTarget_log << Data.velocity.x << ","; //velocity
+    PositionTarget_log << Data.velocity.y << ",";
+    PositionTarget_log << Data.velocity.z << ",";
 
-    PositionTarget_log << Data->acceleration_or_force->x << ","; //acceleration
-    PositionTarget_log << Data->acceleration_or_force->y << ",";
-    PositionTarget_log << Data->acceleration_or_force->z << ",";
+    PositionTarget_log << Data.acceleration_or_force.x << ","; //acceleration
+    PositionTarget_log << Data.acceleration_or_force.y << ",";
+    PositionTarget_log << Data.acceleration_or_force.z << ",";
 
-    PositionTarget_log << Data->type_mask ;
+    PositionTarget_log << Data.type_mask ;
 
     PositionTarget_log << "\n";
 
@@ -153,16 +153,16 @@ void File_write::save_data(mavros_msgs::State &Data){ // prints data into the fi
     uint8 system_status
     */
 
-    State_log << Data->header->seq << ",";
-    State_log << Data->header->frame_id << ",";
-    State_log << Data->header->stamp << ",";
+    State_log << Data.header.seq << ",";
+    State_log << Data.header.frame_id << ",";
+    State_log << Data.header.stamp << ",";
 
-    State_log << Data->connected << ",";
-    State_log << Data->armed << ",";
-    State_log << Data->guided << ",";
-    State_log << Data->manual_input << ",";
-    State_log << Data->mode << ",";
-    State_log << Data->system_status;
+    State_log << Data.connected << ",";
+    State_log << Data.armed << ",";
+    State_log << Data.guided << ",";
+    State_log << Data.manual_input << ",";
+    State_log << Data.mode << ",";
+    State_log << Data.system_status;
 
     State_log << "\n";
 
