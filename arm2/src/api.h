@@ -23,6 +23,7 @@
 #include <string>
 
 #define DEBUG
+#define LOGING
 
 static void state_cb(const mavros_msgs::State::ConstPtr& msg); //callback function for current state
 static void get_pos(const geometry_msgs::PoseStamped::ConstPtr& msg); // callback function for current positon
@@ -76,6 +77,7 @@ private:
 
     
     /// experimental finish
+
     
 public: 
     
@@ -88,28 +90,28 @@ public:
     bool disarm(); //function to disarm
     bool set_mode(std::string mode); // function to set mode
 
-    void take_off(float altitude);
-    void take_off_2(float altitude); // take of in ENU
+    // void take_off(float altitude);
+    // void take_off_2(float altitude); // take of in ENU
 
     
-    void landing(); //updates altitude for landing
+    // void landing(); //updates altitude for landing
 
-    void set_point(float x, float y , float z); // ENU system
-    void set_point(float x, float y); // for horizontal flight
+    // void set_point(float x, float y , float z); // ENU system
+    // void set_point(float x, float y); // for horizontal flight
 
-    void set_point_2(float x, float y , float z);
-    void set_point_2(float x, float y); // for horizontal flight
+    // void set_point_2(float x, float y , float z);
+    // void set_point_2(float x, float y); // for horizontal flight
 
     void set_point_NED(float x, float y , float z); //data sent in NED 
     void set_point_NED(float x, float y);
 
     void set_home(); // sets home position
-    void refresh_set_point(); // refreshes set point to current location
+    // void refresh_set_point(); // refreshes set point to current location
     void refresh_set_point_NED();
     void reset(); // reset???
-    void march();  /// applying all changes anf flying
+    // void march();  /// applying all changes anf flying
 
-    void march_NED();
+    void march_NED();  /// applying all changes anf flying
 
     bool reached_point(); // function for checking if point reached 
     
@@ -235,6 +237,23 @@ bool api::disarm(){
     * supported:
         "OFFBOARD"
         "MANUAL"
+    available for px4
+    *
+    string MODE_PX4_MANUAL=MANUAL
+    string MODE_PX4_ACRO=ACRO
+    string MODE_PX4_ALTITUDE=ALTCTL
+    string MODE_PX4_POSITION=POSCTL
+    string MODE_PX4_OFFBOARD=OFFBOARD
+    string MODE_PX4_STABILIZED=STABILIZED
+    string MODE_PX4_RATTITUDE=RATTITUDE
+    string MODE_PX4_MISSION=AUTO.MISSION
+    string MODE_PX4_LOITER=AUTO.LOITER
+    string MODE_PX4_RTL=AUTO.RTL
+    string MODE_PX4_LAND=AUTO.LAND
+    string MODE_PX4_RTGS=AUTO.RTGS
+    string MODE_PX4_READY=AUTO.READY
+    string MODE_PX4_TAKEOFF=AUTO.TAKEOFF
+    *
 */
 bool api::set_mode(std::string mode){
     offb_set_mode.request.custom_mode = "OFFBOARD";
@@ -252,40 +271,14 @@ bool api::set_mode(std::string mode){
     * @param - altitude to go to
 
 */
-void api::take_off(float altitude){
-    setpoint_position.pose.position.z = current_position.pose.position.z + altitude;
-}
-/*
-    * function to take off
-    * @param - altitude to go to
 
-*/
-void api::take_off_2(float altitude){
-    setpoint_position.pose.position.z += altitude;
-}
 void api::take_off_NED(float altitude){
     set_point_raw.position.z -= altitude;
     ROS_INFO_STREAM("altitude: " << altitude);
     ROS_INFO_STREAM("target altitude: " << set_point_raw.position.z);
 }
 
-/*
-    * function to land
-    * not yet works turning off motors
 
-*/
-void api::landing(){
-    setpoint_position.pose.position.z = home.pose.position.z;
-}
-/*
-    * function to start activity
-
-*/
-void api::march(){
-    local_pos_pub.publish(setpoint_position);
-    ros::spinOnce();
-    rate.sleep();
-}
 
 void api::march_NED(){
     set_point_raw_pub.publish(set_point_raw);
@@ -294,58 +287,17 @@ void api::march_NED(){
 }
 
 
-void api::refresh_set_point(){
-    // setpoint_position = current_position;
-    setpoint_position.pose.position.x = current_position.pose.position.x;
-    setpoint_position.pose.position.y = current_position.pose.position.y;
-    setpoint_position.pose.position.z = current_position.pose.position.z;
-    // setpoint_position.pose.orientation.x = 0;
-    // setpoint_position.pose.orientation.y = 0;
-    // setpoint_position.pose.orientation.z = 0;
-    // setpoint_position.pose.orientation.w = -1;
-}
+
 void api::refresh_set_point_NED(){
     set_point_raw.position.x = current_position.pose.position.x;
     set_point_raw.position.y = current_position.pose.position.y;
     set_point_raw.position.z = current_position.pose.position.z;
     ROS_INFO_STREAM("target altitude: " << current_position);
-    // setpoint_position = current_position;
-    // set_point_raw.pose.position.x = current_position.pose.position.x;
-    // set_point_raw.pose.position.y = current_position.pose.position.y;
-    // set_point_raw.pose.position.z = current_position.pose.position.z;
-    // set_point_raw.pose.orientation.x = 0;
-    // set_point_raw.pose.orientation.y = 0;
-    // set_point_raw.pose.orientation.z = 0;
-    // set_point_raw.pose.orientation.w = -1;
+
 }
 
 
-void api::set_point(float x, float y , float z){
-    setpoint_position.pose.position.x = current_position.pose.position.x + x;
-    setpoint_position.pose.position.y = current_position.pose.position.y + y;
-    setpoint_position.pose.position.z = current_position.pose.position.z + z;
-    #ifdef DEBUG
-    // ROS_INFO("setpoint_position position x: %lf",setpoint_position.pose.position.x);
-    // ROS_INFO("setpoint_position position y: %lf",setpoint_position.pose.position.y);
-    // ROS_INFO("setpoint_position position z: %lf\n",setpoint_position.pose.position.z);
-    // ROS_INFO("current_position position x: %lf",current_position.pose.position.x);
-    // ROS_INFO("current_position position y: %lf",current_position.pose.position.y);
-    // ROS_INFO("current_position position z: %lf\n",current_position.pose.position.z);
-    #endif
-}
-void api::set_point_2(float x, float y , float z){
-    setpoint_position.pose.position.x += x;
-    setpoint_position.pose.position.y += y;
-    setpoint_position.pose.position.z += z;
-    #ifdef DEBUG
-    // ROS_INFO("setpoint_position position x: %lf",setpoint_position.pose.position.x);
-    // ROS_INFO("setpoint_position position y: %lf",setpoint_position.pose.position.y);
-    // ROS_INFO("setpoint_position position z: %lf\n",setpoint_position.pose.position.z);
-    // ROS_INFO("current_position position x: %lf",current_position.pose.position.x);
-    // ROS_INFO("current_position position y: %lf",current_position.pose.position.y);
-    // ROS_INFO("current_position position z: %lf\n",current_position.pose.position.z);
-    #endif
-}
+
 void api::set_point_NED (float x, float y , float z){
     set_point_raw.position.x += x;
     set_point_raw.position.y -= y;
@@ -355,16 +307,7 @@ void api::set_point_NED (float x, float y , float z){
     #endif
 }
 
-void api::set_point(float x, float y){
-    setpoint_position.pose.position.x = current_position.pose.position.x + x;
-    setpoint_position.pose.position.y = current_position.pose.position.y + y;
 
-}
-void api::set_point_2(float x, float y){
-    setpoint_position.pose.position.x += x;
-    setpoint_position.pose.position.y += y;
-
-}
 
 void api::set_point_NED(float x, float y){
     set_point_raw.position.x += x;
@@ -407,17 +350,17 @@ void api::set_home(){
 /*
     * function to check if destination reached
 */
-bool api::reached_point(){
-    float dx = setpoint_position.pose.position.x - current_position.pose.position.x ;
-    float dy = setpoint_position.pose.position.y - current_position.pose.position.y ;
-    float dz = setpoint_position.pose.position.z - current_position.pose.position.z ;
-    return  sqrt (dx * dx + dy * dy + dz * dz)  < dest_threshold;
-}
+
 bool api::reached_point_NED(){
     float dx = set_point_raw.position.x - current_position.pose.position.x ;
     float dy = set_point_raw.position.y - current_position.pose.position.y ;
     float dz = set_point_raw.position.z - current_position.pose.position.z ;
     return  sqrt (dx * dx + dy * dy + dz * dz)  < dest_threshold;
+
+    #ifdef DEBUG
+    ROS_INFO_STREAM("set point: " << set_point_raw);
+    ROS_INFO_STREAM("current position: " << current_position);
+    #endif
 }
 
 
@@ -475,3 +418,78 @@ void api::get_position_ret(float &x,float &y,float &z,float &yaw ){
     z = position.pose.position.z;
     yaw = this->yaw;
 }
+
+
+// void api::take_off(float altitude){
+//     setpoint_position.pose.position.z = current_position.pose.position.z + altitude;
+// }
+/*
+    * function to take off
+    * @param - altitude to go to
+
+*/
+// void api::take_off_2(float altitude){
+//     setpoint_position.pose.position.z += altitude;
+// }
+
+/*
+    * function to land
+    * not yet works turning off motors
+
+*/
+// void api::landing(){
+//     setpoint_position.pose.position.z = home.pose.position.z;
+// }
+/*
+    * function to start activity
+
+*/
+// void api::march(){
+//     local_pos_pub.publish(setpoint_position);
+//     ros::spinOnce();
+//     rate.sleep();
+// }
+
+
+// void api::refresh_set_point(){
+//     // setpoint_position = current_position;
+//     setpoint_position.pose.position.x = current_position.pose.position.x;
+//     setpoint_position.pose.position.y = current_position.pose.position.y;
+//     setpoint_position.pose.position.z = current_position.pose.position.z;
+// }
+
+
+// void api::set_point(float x, float y , float z){
+//     setpoint_position.pose.position.x = current_position.pose.position.x + x;
+//     setpoint_position.pose.position.y = current_position.pose.position.y + y;
+//     setpoint_position.pose.position.z = current_position.pose.position.z + z;
+//     #ifdef DEBUG
+
+//     #endif
+// }
+// void api::set_point_2(float x, float y , float z){
+//     setpoint_position.pose.position.x += x;
+//     setpoint_position.pose.position.y += y;
+//     setpoint_position.pose.position.z += z;
+//     #ifdef DEBUG
+
+//     #endif
+// }
+
+// void api::set_point(float x, float y){
+//     setpoint_position.pose.position.x = current_position.pose.position.x + x;
+//     setpoint_position.pose.position.y = current_position.pose.position.y + y;
+
+// }
+// void api::set_point_2(float x, float y){
+//     setpoint_position.pose.position.x += x;
+//     setpoint_position.pose.position.y += y;
+
+// }
+
+// bool api::reached_point(){
+//     float dx = setpoint_position.pose.position.x - current_position.pose.position.x ;
+//     float dy = setpoint_position.pose.position.y - current_position.pose.position.y ;
+//     float dz = setpoint_position.pose.position.z - current_position.pose.position.z ;
+//     return  sqrt (dx * dx + dy * dy + dz * dz)  < dest_threshold;
+// }

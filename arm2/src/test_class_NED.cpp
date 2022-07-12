@@ -27,20 +27,15 @@ int main(int argc, char **argv){
     my_drone.refresh_set_point_NED(); // init set_point to current state
     
     my_drone.get_position();
-    // my_drone.init_heading();
-    // my_drone.take_off_NED(1);
-    // my_drone.set_attitude(0,0,0);
-    // my_drone.refresh_set_point();
+
     my_drone.get_position_ret(x,y,z,yaw);
     my_drone.set_heading_global(yaw);
     // my_drone.take_off_2(1);
     for (int i = 0; i < 100; i++) // send a few initial set points before continueing
     {
-        // my_drone.march();
         my_drone.march_NED(); ///send cmds
-        // my_drone.set_attitude();
     }
-    // my_drone.set_attitude(0,0,0);
+
     my_drone.arm(); // try to arm
     my_drone.set_mode(std::string("OFFBOARD")); //try to transition into offboard mode
     ROS_INFO("Take off\n");
@@ -51,7 +46,6 @@ int main(int argc, char **argv){
     }
     ROS_INFO("Take off completed\n");
 
-    // my_drone.set_heading_offset(1.57);
     ROS_INFO("Rotate\n");
     my_drone.set_timer(5.0);
     while ( ! my_drone.check_timer() &&ros::ok()){my_drone.march_NED();}
@@ -85,9 +79,7 @@ int main(int argc, char **argv){
 
     my_drone.landing();
     my_drone.land();
-    // while(ros::ok() && !my_drone.reached_point()){ //while loop for main program
-    //     my_drone.march();//spin code (publish set points)
-    // }
+
     my_drone.set_timer(5.0);
     while ( ! my_drone.check_timer() &&ros::ok()){}
     ROS_INFO("Landed:\n");
