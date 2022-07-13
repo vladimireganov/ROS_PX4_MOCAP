@@ -32,6 +32,7 @@ int main(int argc, char **argv){
     my_drone.refresh_set_point_NED(); // init set_point to current state
     
     my_drone.get_position();
+    my_drone.set_home();
 
     my_drone.get_position_ret(x,y,z,yaw);
     my_drone.set_heading_global(yaw);

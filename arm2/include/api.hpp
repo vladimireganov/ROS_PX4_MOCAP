@@ -135,6 +135,9 @@ public:
     void set_point_NED_global(float x, float y);
     void set_point_NED_global(float x, float y, float z);
 
+    void set_global_point(float x, float y);
+    void set_global_point(float x, float y, float z);
+
     void get_position_ret(float &x,float &y,float &z,float &yaw ); // function for sending position and orientation to the user
     /// experimental finish
 };
@@ -335,15 +338,27 @@ void api::set_point_NED(float x, float y){
     logger.save_data(set_point_raw);
 }
 
-void api::set_point_NED_global(float x, float y, float z){
+void api::set_global_point(float x, float y){
+    set_point_raw.position.x = x;
+    set_point_raw.position.y = -y;
+    logger.save_data(set_point_raw);
+}
+void api::set_global_point(float x, float y, float z){
     set_point_raw.position.x = x;
     set_point_raw.position.y = -y;
     set_point_raw.position.z = -z;
     logger.save_data(set_point_raw);
 }
+
+void api::set_point_NED_global(float x, float y, float z){
+    set_point_raw.position.x = home.pose.position.x + x;
+    set_point_raw.position.y = home.pose.position.y - y;
+    set_point_raw.position.z = home.pose.position.z - z;
+    logger.save_data(set_point_raw);
+}
 void api::set_point_NED_global(float x, float y){
-    set_point_raw.position.x = x;
-    set_point_raw.position.y = -y;
+    set_point_raw.position.x = home.pose.position.x + x;
+    set_point_raw.position.y = home.pose.position.y - y;
     logger.save_data(set_point_raw);
 }
 
@@ -353,10 +368,10 @@ void api::set_home(){
     home.pose.position.x = current_position.pose.position.x;
     home.pose.position.y = current_position.pose.position.y;
     home.pose.position.z = current_position.pose.position.z;
-    home.pose.orientation.x = 0;//current_position.pose.orientation.x;
-    home.pose.orientation.y = 0;//current_position.pose.orientation.y;
-    home.pose.orientation.z = 0;//current_position.pose.orientation.z;
-    home.pose.orientation.w = -1;//current_position.pose.orientation.w;
+    home.pose.orientation.x = current_position.pose.orientation.x;
+    home.pose.orientation.y = current_position.pose.orientation.y;
+    home.pose.orientation.z = current_position.pose.orientation.z;
+    home.pose.orientation.w = current_position.pose.orientation.w;
     // home = current_position;
     logger.save_data(current_position);
     #ifdef DEBUG

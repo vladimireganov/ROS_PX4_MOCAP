@@ -115,10 +115,10 @@ int main(int argc, char **argv){
     
     my_drone.arm(); // try to arm
     my_drone.set_mode(std::string("OFFBOARD")); //try to transition into offboard mode
-    // my_drone.set_home(); //
     my_drone.refresh_set_point_NED(); // init set_point to current state
     
     my_drone.get_position();
+    my_drone.set_home();
 
     my_drone.get_position_ret(x,y,z,yaw);
     my_drone.set_heading_global(yaw);
@@ -150,7 +150,7 @@ int main(int argc, char **argv){
     my_drone.land();
 
     my_drone.set_timer(5.0);
-    while ( ! my_drone.check_timer() &&ros::ok()){}
+    while ( ! my_drone.check_timer() && ros::ok()){}
     ROS_INFO("Landed:\n");
     my_drone.disarm();
 
