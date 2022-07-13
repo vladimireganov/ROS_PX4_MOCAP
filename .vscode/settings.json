@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "xstring": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "__node_handle": "cpp"
     }
 }
