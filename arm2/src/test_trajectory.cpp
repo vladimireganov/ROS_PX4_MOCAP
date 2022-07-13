@@ -87,6 +87,7 @@ int main(int argc, char **argv){
 
     File_read test("/home/ros/test/src/large_scale_traj_optimizer-main/example1/src/trajectory.csv");
     route = test.read_all_data();
+    int N = (int) (route.cols()) -1;
 
     iS.col(0) << route.leftCols<1>();
     fS.col(0) << route.rightCols<1>();
@@ -139,7 +140,7 @@ int main(int argc, char **argv){
 
     for (double i = 0; i < minSnapTraj.getTotalDuration(); i+= 0.1){
         position =  minSnapTraj.getPos(i);
-        my_drone.set_point_NED(position[0],position[1],position[2]);
+        my_drone.set_point_NED_global(position[0],position[1],position[2]);
         my_drone.set_heading_offset(0);
         while(ros::ok() && !my_drone.reached_point_NED()){ //while loop for main program
             my_drone.march_NED();//spin code (publish set points)
