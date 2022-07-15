@@ -36,14 +36,17 @@ ax.set_title("Minimum snap trajectory generation")
 ax.set_xlabel('Position Y')
 ax.set_ylabel("Position X")
 # ax.set_xlim([limL,limR])
-l1, = ax.plot(df["position_y"],df["position_x"],color='orange',label="position_x")
+l1, = ax.plot(df["position_y"],df["position_x"],color='orange')
 ax.legend(handles=[l1])
 plt.grid()
 
 
 fig = plt.figure()
 ax = plt.axes(projection='3d')
-ax.set_title("3D position") # again passes data from all are being overwritten by passed data
+ax.set_title("Minimum snap trajectory generation") # again passes data from all are being overwritten by passed data
 ax.scatter3D(df["position_x"], df["position_y"], df["position_z"], 'gray')
+ax.set_xlabel('X ')
+ax.set_ylabel('Y ')
+ax.set_zlabel('Z ')
 
 plt.show()
