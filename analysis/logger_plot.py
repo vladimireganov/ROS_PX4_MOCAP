@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-
+import matplotlib.gridspec as gridspec
 import pandas as pd
 
 def read_data(file):
@@ -46,3 +46,13 @@ ax.scatter3D(postion["position_x"], postion["position_y"], postion["position_z"]
 
 
 plt.show()
+
+fig3 = plt.figure(constrained_layout=True)
+spec2 = gridspec.GridSpec(ncols=3, nrows=3, figure=fig3)
+f2_ax0 = fig3.add_subplot(spec2[0, 0])
+f2_ax1 = fig3.add_subplot(spec2[1, 0])
+f2_ax2 = fig3.add_subplot(spec2[2, 0])
+f2_ax3 = fig3.add_subplot(spec2[0, 1])
+f2_ax4 = fig3.add_subplot(spec2[1, 1])
+f2_ax5 = fig3.add_subplot(spec2[2, 1])
+
