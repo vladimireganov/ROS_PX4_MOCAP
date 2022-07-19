@@ -13,6 +13,8 @@ visual_position = read_data("analysis/logs/min_snap_05_estimator_visual_odometry
 set_way_points = read_data("large_scale_traj_optimizer-main/example1/src/trajectory.csv")
 # set_point = read_data("analysis/target_position.csv")
 
+
+#  Position X
 fig = plt.figure()
 ax = plt.subplot()
 ax.set_title("Position from px4")
@@ -27,7 +29,23 @@ l4, = ax.plot(estimator_position["timestamp"],estimator_position["x"],color='gre
 ax.legend(handles=[l1,l2,l3,l4])
 plt.grid()
 
+#  Velocity x
+fig = plt.figure()
+ax = plt.subplot()
+ax.set_title("Velocity from px4")
+ax.set_xlabel('stamp')
+ax.set_ylabel("Velocity X")
+# ax.set_xlim([limL,limR])
+l1, = ax.plot(local_position["timestamp"],local_position["vx"],color='orange',label="velocity_x")
+l2, = ax.plot(set_point_position["timestamp"],set_point_position["vx"],color='red',label="velocity_x reference")
+# l3, = ax.plot(visual_position["timestamp"],visual_position["vx"],color='blue',label="visual_velociy_x")
+l4, = ax.plot(estimator_position["timestamp"],estimator_position["vx"],color='green',label="estimator_velocity_x")
 
+ax.legend(handles=[l1,l2,l4])
+plt.grid()
+
+
+#  Position Y
 fig = plt.figure()
 ax = plt.subplot()
 ax.set_title("Position from px4")
@@ -43,6 +61,23 @@ ax.legend(handles=[l1,l2,l3,l4])
 plt.grid()
 
 
+#  Velocity Y
+fig = plt.figure()
+ax = plt.subplot()
+ax.set_title("Velocity from px4")
+ax.set_xlabel('stamp')
+ax.set_ylabel("Velocity Y")
+# ax.set_xlim([limL,limR])
+l1, = ax.plot(local_position["timestamp"],local_position["vy"],color='orange',label="velocity_y")
+l2, = ax.plot(set_point_position["timestamp"],set_point_position["vy"],color='red',label="velocity_y reference")
+# l3, = ax.plot(visual_position["timestamp"],visual_position["vx"],color='blue',label="visual_velociy_x")
+l4, = ax.plot(estimator_position["timestamp"],estimator_position["vy"],color='green',label="estimator_velocity_y")
+
+ax.legend(handles=[l1,l2,l4])
+plt.grid()
+
+
+#  Position Z
 fig = plt.figure()
 ax = plt.subplot()
 ax.set_title("Position from px4")
@@ -57,6 +92,24 @@ l4, = ax.plot(estimator_position["timestamp"],estimator_position["z"],color='gre
 ax.legend(handles=[l1,l2,l3,l4])
 plt.grid()
 
+
+# Velocity Z
+fig = plt.figure()
+ax = plt.subplot()
+ax.set_title("Velocity from px4")
+ax.set_xlabel('stamp')
+ax.set_ylabel("Velocity Z")
+# ax.set_xlim([limL,limR])
+l1, = ax.plot(local_position["timestamp"],local_position["vz"],color='orange',label="velocity_z")
+l2, = ax.plot(set_point_position["timestamp"],set_point_position["vz"],color='red',label="velocity_z reference")
+# l3, = ax.plot(visual_position["timestamp"],visual_position["vx"],color='blue',label="visual_velociy_x")
+l4, = ax.plot(estimator_position["timestamp"],estimator_position["vz"],color='green',label="estimator_velocity_z")
+
+ax.legend(handles=[l1,l2,l4])
+plt.grid()
+
+
+# Position X over Y
 fig = plt.figure()
 ax = plt.subplot()
 ax.set_title("Position from px4")
@@ -74,6 +127,8 @@ plt.grid()
 
 
 
+
+#  Heading 
 fig = plt.figure()
 ax = plt.subplot()
 ax.set_title("Heading from px4")
