@@ -7,8 +7,8 @@ import pandas as pd
 def read_data(file):
     return pd.read_csv(file,sep=",")
 
-df = read_data("large_scale_traj_optimizer-main/example1/src/snap.csv")
-set_way_points = read_data("large_scale_traj_optimizer-main/example1/src/trajectory.csv")
+df = read_data("trajectories/snap.csv")
+set_way_points = read_data("trajectories/trajectory.csv")
 
 fig = plt.figure()
 ax = plt.subplot()
