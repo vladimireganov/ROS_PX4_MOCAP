@@ -56,7 +56,7 @@ private:
 
     /* data */
     
-    ros::Rate rate = ros::Rate(40.0); // update frequency
+    ros::Rate rate = ros::Rate(110.0); // update frequency
     
     mavros_msgs::CommandBool arm_cmd; //variable for arming
 

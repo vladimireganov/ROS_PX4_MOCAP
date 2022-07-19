@@ -132,6 +132,10 @@ int main(int argc, char **argv){
     ROS_INFO("Take off\n");
     my_drone.take_off_NED(-1); // go .5 m up
     my_drone.set_heading_offset(0);
+    // my_drone.set_timer(5.0);
+    // while(ros::ok() && ! my_drone.check_timer()){ //while loop for main program
+    //     my_drone.march_NED();//spin code (publish set points)
+    // }
     while(ros::ok() && !my_drone.reached_point_NED()){ //while loop for main program
         my_drone.march_NED();//spin code (publish set points)
     }
@@ -140,11 +144,11 @@ int main(int argc, char **argv){
     my_drone.set_home();
 
 
-    for (double i = 0; i < minSnapTraj.getTotalDuration(); i+= 0.1){
+    for (double i = 0; i < minSnapTraj.getTotalDuration(); i+= 0.01){
         position =  minSnapTraj.getPos(i);
         my_drone.set_point_NED_global(position[0],position[1],position[2]);
         my_drone.set_heading_offset(0);
-        my_drone.set_timer(0.1);
+        my_drone.set_timer(0.01);
         while(ros::ok() && ! my_drone.check_timer()){ //while loop for main program
             my_drone.march_NED();//spin code (publish set points)
         }
