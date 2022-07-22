@@ -5,12 +5,15 @@ import pandas as pd
 def read_data(file):
     return pd.read_csv(file,sep=",")
 
-local_position = read_data("analysis/logs/min_snap_05_vehicle_local_position_0.csv")
-set_point_position = read_data("analysis/logs/min_snap_05_vehicle_local_position_setpoint_0.csv")
-estimator_position = read_data("analysis/logs/min_snap_05_estimator_local_position_0.csv")
-estimator_position2 = read_data("analysis/logs/min_snap_05_estimator_local_position_1.csv")
-visual_position = read_data("analysis/logs/min_snap_05_estimator_visual_odometry_aligned_0.csv")
-set_way_points = read_data("large_scale_traj_optimizer-main/example1/src/trajectory.csv")
+# path = "analysis/logs/square/square5" #square_calibrated5
+path = "analysis/logs/square/square2"
+
+local_position = read_data(path +"_vehicle_local_position_0.csv")
+set_point_position = read_data(path +"_vehicle_local_position_setpoint_0.csv")
+estimator_position = read_data(path +"_estimator_local_position_0.csv")
+estimator_position2 = read_data(path +"_estimator_local_position_1.csv")
+visual_position = read_data(path +"_estimator_visual_odometry_aligned_0.csv")
+# set_way_points = read_data("large_scale_traj_optimizer-main/example1/src/trajectory.csv")
 # set_point = read_data("analysis/target_position.csv")
 
 
@@ -25,8 +28,9 @@ l1, = ax.plot(local_position["timestamp"],local_position["x"],color='orange',lab
 l2, = ax.plot(set_point_position["timestamp"],set_point_position["x"],color='red',label="position_x reference")
 l3, = ax.plot(visual_position["timestamp"],visual_position["x"],color='blue',label="visual_position_x")
 l4, = ax.plot(estimator_position["timestamp"],estimator_position["x"],color='green',label="estimator_position_x")
+l5, = ax.plot(estimator_position2["timestamp"],estimator_position2["x"],color='green',label="estimator_position_x 2")
 
-ax.legend(handles=[l1,l2,l3,l4])
+ax.legend(handles=[l1,l2,l3,l4,l5])
 plt.grid()
 
 #  Velocity x
