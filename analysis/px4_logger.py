@@ -6,7 +6,11 @@ def read_data(file):
     return pd.read_csv(file,sep=",")
 
 # path = "analysis/logs/square/square5" #square_calibrated5
-path = "analysis/logs/square/square2"
+# path = "analysis/logs/square/square2"
+# path = "analysis\logs\min_snap_05"
+path = "E:/px4_data/flight_logs/log_43_2022-6-14-13-40-30"
+# log_43_2022-6-14-13-40-30
+# path = "E:/px4_data/flight_logs/log_43_2022-6-14-13-40-30"
 
 local_position = read_data(path +"_vehicle_local_position_0.csv")
 set_point_position = read_data(path +"_vehicle_local_position_setpoint_0.csv")
@@ -15,7 +19,21 @@ estimator_position2 = read_data(path +"_estimator_local_position_1.csv")
 visual_position = read_data(path +"_estimator_visual_odometry_aligned_0.csv")
 # set_way_points = read_data("large_scale_traj_optimizer-main/example1/src/trajectory.csv")
 # set_point = read_data("analysis/target_position.csv")
+set_point_position["x_error"] = set_point_position["x"] - local_position["x"]
+set_point_position["y_error"] = set_point_position["y"] - local_position["y"]
+set_point_position["z_error"] = set_point_position["z"] - local_position["z"]
 
+local_position["timestamp"] = local_position["timestamp"] - local_position["timestamp"][0]
+set_point_position["timestamp"] = set_point_position["timestamp"] - set_point_position["timestamp"][0]
+estimator_position["timestamp"] = estimator_position["timestamp"] - estimator_position["timestamp"][0]
+estimator_position2["timestamp"] = estimator_position2["timestamp"] - estimator_position2["timestamp"][0]
+visual_position["timestamp"] = visual_position["timestamp"] - visual_position["timestamp"][0]
+
+local_position["timestamp"] = local_position["timestamp"] / 1e6
+set_point_position["timestamp"] = set_point_position["timestamp"] / 1e6
+estimator_position["timestamp"] = estimator_position["timestamp"] / 1e6
+estimator_position2["timestamp"] = estimator_position2["timestamp"] / 1e6
+visual_position["timestamp"] = visual_position["timestamp"] / 1e6
 
 #  Position X
 fig = plt.figure()
@@ -28,9 +46,9 @@ l1, = ax.plot(local_position["timestamp"],local_position["x"],color='orange',lab
 l2, = ax.plot(set_point_position["timestamp"],set_point_position["x"],color='red',label="position_x reference")
 l3, = ax.plot(visual_position["timestamp"],visual_position["x"],color='blue',label="visual_position_x")
 l4, = ax.plot(estimator_position["timestamp"],estimator_position["x"],color='green',label="estimator_position_x")
-l5, = ax.plot(estimator_position2["timestamp"],estimator_position2["x"],color='green',label="estimator_position_x 2")
+# l5, = ax.plot(estimator_position2["timestamp"],estimator_position2["x"],color='green',label="estimator_position_x 2")
 
-ax.legend(handles=[l1,l2,l3,l4,l5])
+ax.legend(handles=[l1,l2,l3,l4])
 plt.grid()
 
 #  Velocity x
@@ -125,8 +143,9 @@ l2, = ax.plot(set_point_position["y"],set_point_position["x"],color='red',label=
 # l3 = ax.scatter(set_way_points["y"],set_way_points["x"],color='red',label="waypoints")
 # ax.legend(handles=[l1,l2,l3])
 l3, = ax.plot(visual_position["y"],visual_position["x"],color='blue',label="visual_position")
-l4, = ax.plot(estimator_position["y"],estimator_position["x"],color='green',label="estimator_position")
-ax.legend(handles=[l1,l2,l3,l4])
+# l4, = ax.plot(estimator_position["y"],estimator_position["x"],color='green',label="estimator_position")
+# ax.legend(handles=[l1,l2,l3,l4])
+ax.legend(handles=[l1,l2,l3])
 plt.grid()
 
 
@@ -150,9 +169,28 @@ plt.grid()
 
 fig = plt.figure()
 ax = plt.axes(projection='3d')
-ax.set_title("3D position") # again passes data from all are being overwritten by passed data
+ax.set_title("3D position estimated") # again passes data from all are being overwritten by passed data
 ax.scatter3D(local_position["x"], local_position["y"], local_position["z"] )
 ax.scatter3D(set_point_position["x"], set_point_position["y"], set_point_position["z"], 'red')
+ax.set_xlabel('X ')
+ax.set_ylabel('Y ')
+ax.set_zlabel('Z ') 
+
+fig = plt.figure()
+ax = plt.axes(projection='3d')
+ax.set_title("3D position visual") # again passes data from all are being overwritten by passed data
+ax.scatter3D(visual_position["x"], visual_position["y"], visual_position["z"] )
+ax.scatter3D(set_point_position["x"], set_point_position["y"], set_point_position["z"], 'red')
+ax.set_xlabel('X ')
+ax.set_ylabel('Y ')
+ax.set_zlabel('Z ') 
+
+fig = plt.figure()
+ax = plt.axes(projection='3d')
+ax.set_title("3D position visual and estimated") # again passes data from all are being overwritten by passed data
+ax.scatter3D(visual_position["x"], visual_position["y"], visual_position["z"] )
+ax.scatter3D(set_point_position["x"], set_point_position["y"], set_point_position["z"], 'red')
+ax.scatter3D(local_position["x"], local_position["y"], local_position["z"] )
 ax.set_xlabel('X ')
 ax.set_ylabel('Y ')
 ax.set_zlabel('Z ') 
@@ -222,4 +260,34 @@ f2_ax8.plot(local_position["timestamp"],local_position["vz"],color='blue')
 f2_ax8.plot(set_point_position["timestamp"],set_point_position["vz"],'r--',label="velocity_z reference")
 
 plt.grid()
+
+
+
+
+
+# Position X error
+fig = plt.figure()
+ax = plt.subplot()
+ax.set_title("Position from px4")
+ax.set_xlabel('stamp')
+ax.set_ylabel("Position X")
+# ax.set_xlim([limL,limR])
+l1, = ax.plot(set_point_position["timestamp"],set_point_position["x_error"],color='orange',label="error")
+
+ax.legend(handles=[l1])
+plt.grid()
+
+# Position Y error
+fig = plt.figure()
+ax = plt.subplot()
+ax.set_title("Position from px4")
+ax.set_xlabel('stamp')
+ax.set_ylabel("Position Y")
+# ax.set_xlim([limL,limR])
+l1, = ax.plot(set_point_position["timestamp"],set_point_position["y_error"],color='orange',label="error")
+
+ax.legend(handles=[l1])
+plt.grid()
+
+
 plt.show()
