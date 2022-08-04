@@ -7,7 +7,9 @@ import pandas as pd
 def read_data(file):
     return pd.read_csv(file,sep=",")
 
-df = read_data("trajectories/snap.csv")
+# df = read_data("trajectories/snap.csv")
+# df = read_data("analysis/snap.csv")
+df = read_data("analysis/8_figure_snap.csv")
 set_way_points = read_data("trajectories/trajectory.csv")
 
 fig = plt.figure()
@@ -30,6 +32,27 @@ ax.set_ylabel("Position Y")
 l1, = ax.plot(df["time"],df["position_y"],color='orange',label="position_y")
 ax.legend(handles=[l1])
 plt.grid()
+
+fig = plt.figure()
+ax = plt.subplot()
+ax.set_title("Minimum snap trajectory generation")
+ax.set_xlabel('Time (s)')
+ax.set_ylabel("Velocity Y")
+# ax.set_xlim([limL,limR])
+l1, = ax.plot(df["time"],df["velocity_y"],color='orange',label="velocity_y")
+ax.legend(handles=[l1])
+plt.grid()
+
+fig = plt.figure()
+ax = plt.subplot()
+ax.set_title("Minimum snap trajectory generation")
+ax.set_xlabel('Time (s)')
+ax.set_ylabel("Velocity X")
+# ax.set_xlim([limL,limR])
+l1, = ax.plot(df["time"],df["velocity_x"],color='orange',label="velocity_x")
+ax.legend(handles=[l1])
+plt.grid()
+
 
 
 fig = plt.figure()

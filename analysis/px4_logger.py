@@ -8,7 +8,8 @@ def read_data(file):
 # path = "analysis/logs/square/square5" #square_calibrated5
 # path = "analysis/logs/square/square2"
 # path = "analysis\logs\min_snap_05"
-path = "E:/px4_data/flight_logs/log_43_2022-6-14-13-40-30"
+path = "/Volumes/GAMEZ/px4_data/flight_logs/log_0_2022-6-17-05-56-16" # weird flight data
+# path = "/Volumes/GAMEZ/px4_data/flight_logs/log_43_2022-6-14-13-40-30"
 # log_43_2022-6-14-13-40-30
 # path = "E:/px4_data/flight_logs/log_43_2022-6-14-13-40-30"
 
@@ -19,21 +20,38 @@ estimator_position2 = read_data(path +"_estimator_local_position_1.csv")
 visual_position = read_data(path +"_estimator_visual_odometry_aligned_0.csv")
 # set_way_points = read_data("large_scale_traj_optimizer-main/example1/src/trajectory.csv")
 # set_point = read_data("analysis/target_position.csv")
-set_point_position["x_error"] = set_point_position["x"] - local_position["x"]
-set_point_position["y_error"] = set_point_position["y"] - local_position["y"]
-set_point_position["z_error"] = set_point_position["z"] - local_position["z"]
+# local_position.dropna(inplace=True)
+# set_point_position.dropna(inplace=True)
+# estimator_position.dropna(inplace=True)
+# estimator_position2.dropna(inplace=True)
+# visual_position.dropna(inplace=True)
 
-local_position["timestamp"] = local_position["timestamp"] - local_position["timestamp"][0]
+
+print(local_position["timestamp"][0],set_point_position["timestamp"][0],estimator_position["timestamp"][0],visual_position["timestamp"][0])
+
+
+
+estimator_position["timestamp"] = estimator_position["timestamp"] - set_point_position["timestamp"][0]
+estimator_position2["timestamp"] = estimator_position2["timestamp"] - set_point_position["timestamp"][0]
+visual_position["timestamp"] = visual_position["timestamp"] - set_point_position["timestamp"][0]
+local_position["timestamp"] = local_position["timestamp"] - set_point_position["timestamp"][0]
 set_point_position["timestamp"] = set_point_position["timestamp"] - set_point_position["timestamp"][0]
-estimator_position["timestamp"] = estimator_position["timestamp"] - estimator_position["timestamp"][0]
-estimator_position2["timestamp"] = estimator_position2["timestamp"] - estimator_position2["timestamp"][0]
-visual_position["timestamp"] = visual_position["timestamp"] - visual_position["timestamp"][0]
 
 local_position["timestamp"] = local_position["timestamp"] / 1e6
 set_point_position["timestamp"] = set_point_position["timestamp"] / 1e6
 estimator_position["timestamp"] = estimator_position["timestamp"] / 1e6
 estimator_position2["timestamp"] = estimator_position2["timestamp"] / 1e6
 visual_position["timestamp"] = visual_position["timestamp"] / 1e6
+
+print(local_position["timestamp"][0],set_point_position["timestamp"][0],estimator_position["timestamp"][0],visual_position["timestamp"][0])
+
+set_point_position["x_error"] = set_point_position["x"] - local_position["x"]
+set_point_position["y_error"] = set_point_position["y"] - local_position["y"]
+set_point_position["z_error"] = set_point_position["z"] - local_position["z"]
+
+local_position["x_error_mocap"] = local_position["x"] - visual_position["x"]
+local_position["y_error_mocap"] = local_position["y"] - visual_position["y"]
+local_position["z_error_mocap"] = local_position["z"] - visual_position["z"]
 
 #  Position X
 fig = plt.figure()
@@ -45,10 +63,10 @@ ax.set_ylabel("Position X")
 l1, = ax.plot(local_position["timestamp"],local_position["x"],color='orange',label="position_x")
 l2, = ax.plot(set_point_position["timestamp"],set_point_position["x"],color='red',label="position_x reference")
 l3, = ax.plot(visual_position["timestamp"],visual_position["x"],color='blue',label="visual_position_x")
-l4, = ax.plot(estimator_position["timestamp"],estimator_position["x"],color='green',label="estimator_position_x")
+# l4, = ax.plot(estimator_position["timestamp"],estimator_position["x"],color='green',label="estimator_position_x")
 # l5, = ax.plot(estimator_position2["timestamp"],estimator_position2["x"],color='green',label="estimator_position_x 2")
 
-ax.legend(handles=[l1,l2,l3,l4])
+ax.legend(handles=[l1,l2,l3])
 plt.grid()
 
 #  Velocity x
@@ -61,9 +79,9 @@ ax.set_ylabel("Velocity X")
 l1, = ax.plot(local_position["timestamp"],local_position["vx"],color='orange',label="velocity_x")
 l2, = ax.plot(set_point_position["timestamp"],set_point_position["vx"],color='red',label="velocity_x reference")
 # l3, = ax.plot(visual_position["timestamp"],visual_position["vx"],color='blue',label="visual_velociy_x")
-l4, = ax.plot(estimator_position["timestamp"],estimator_position["vx"],color='green',label="estimator_velocity_x")
+# l4, = ax.plot(estimator_position["timestamp"],estimator_position["vx"],color='green',label="estimator_velocity_x")
 
-ax.legend(handles=[l1,l2,l4])
+ax.legend(handles=[l1,l2])
 plt.grid()
 
 
@@ -77,9 +95,9 @@ ax.set_ylabel("Position Y")
 l1, = ax.plot(local_position["timestamp"],local_position["y"],color='orange',label="position_y")
 l2, = ax.plot(set_point_position["timestamp"],set_point_position["y"],color='red',label="position_y reference")
 l3, = ax.plot(visual_position["timestamp"],visual_position["y"],color='blue',label="visual_position_y")
-l4, = ax.plot(estimator_position["timestamp"],estimator_position["y"],color='green',label="estimator_position_y")
+# l4, = ax.plot(estimator_position["timestamp"],estimator_position["y"],color='green',label="estimator_position_y")
 
-ax.legend(handles=[l1,l2,l3,l4])
+ax.legend(handles=[l1,l2,l3])
 plt.grid()
 
 
@@ -93,9 +111,9 @@ ax.set_ylabel("Velocity Y")
 l1, = ax.plot(local_position["timestamp"],local_position["vy"],color='orange',label="velocity_y")
 l2, = ax.plot(set_point_position["timestamp"],set_point_position["vy"],color='red',label="velocity_y reference")
 # l3, = ax.plot(visual_position["timestamp"],visual_position["vx"],color='blue',label="visual_velociy_x")
-l4, = ax.plot(estimator_position["timestamp"],estimator_position["vy"],color='green',label="estimator_velocity_y")
+# l4, = ax.plot(estimator_position["timestamp"],estimator_position["vy"],color='green',label="estimator_velocity_y")
 
-ax.legend(handles=[l1,l2,l4])
+ax.legend(handles=[l1,l2])
 plt.grid()
 
 
@@ -109,9 +127,9 @@ ax.set_ylabel("Position Z")
 l1, = ax.plot(local_position["timestamp"],local_position["z"],color='orange',label="position_z")
 l2, = ax.plot(set_point_position["timestamp"],set_point_position["z"],color='red',label="position_z reference")
 l3, = ax.plot(visual_position["timestamp"],visual_position["z"],color='blue',label="visual_position_z")
-l4, = ax.plot(estimator_position["timestamp"],estimator_position["z"],color='green',label="estimator_position_z")
+# l4, = ax.plot(estimator_position["timestamp"],estimator_position["z"],color='green',label="estimator_position_z")
 
-ax.legend(handles=[l1,l2,l3,l4])
+ax.legend(handles=[l1,l2,l3])
 plt.grid()
 
 
@@ -125,9 +143,9 @@ ax.set_ylabel("Velocity Z")
 l1, = ax.plot(local_position["timestamp"],local_position["vz"],color='orange',label="velocity_z")
 l2, = ax.plot(set_point_position["timestamp"],set_point_position["vz"],color='red',label="velocity_z reference")
 # l3, = ax.plot(visual_position["timestamp"],visual_position["vx"],color='blue',label="visual_velociy_x")
-l4, = ax.plot(estimator_position["timestamp"],estimator_position["vz"],color='green',label="estimator_velocity_z")
+# l4, = ax.plot(estimator_position["timestamp"],estimator_position["vz"],color='green',label="estimator_velocity_z")
 
-ax.legend(handles=[l1,l2,l4])
+ax.legend(handles=[l1,l2])
 plt.grid()
 
 
@@ -268,26 +286,77 @@ plt.grid()
 # Position X error
 fig = plt.figure()
 ax = plt.subplot()
-ax.set_title("Position from px4")
+ax.set_title("Position error from px4")
 ax.set_xlabel('stamp')
 ax.set_ylabel("Position X")
 # ax.set_xlim([limL,limR])
 l1, = ax.plot(set_point_position["timestamp"],set_point_position["x_error"],color='orange',label="error")
-
+# l2, = ax.plot(local_position["timestamp"],local_position["x_error_mocap"],color='green',label="visual error")
 ax.legend(handles=[l1])
 plt.grid()
 
 # Position Y error
 fig = plt.figure()
 ax = plt.subplot()
-ax.set_title("Position from px4")
+ax.set_title("Position error from px4")
 ax.set_xlabel('stamp')
 ax.set_ylabel("Position Y")
 # ax.set_xlim([limL,limR])
-l1, = ax.plot(set_point_position["timestamp"],set_point_position["y_error"],color='orange',label="error")
-
+l1, = ax.plot(set_point_position["timestamp"],set_point_position["y_error"],color='orange',label="estimator error")
+# l2, = ax.plot(local_position["timestamp"],local_position["y_error_mocap"],color='green',label="visual error")
 ax.legend(handles=[l1])
 plt.grid()
 
 
+
+
+fig4 = plt.figure(constrained_layout=True)
+spec2 = gridspec.GridSpec(ncols=1, nrows=3, figure=fig4)
+f4_ax0 = fig4.add_subplot(spec2[0])
+plt.grid()
+f4_ax1 = fig4.add_subplot(spec2[1])
+plt.grid()
+f4_ax2 = fig4.add_subplot(spec2[2])
+plt.grid()
+
+
+l1, = f4_ax0.plot(local_position["timestamp"],local_position["heading"],color='orange',label="heading")
+f4_ax0.set_ylabel("Heading")
+f4_ax0.set_xlabel('time stamp')
+
+f4_ax1.set_xlabel('time stamp')
+f4_ax1.set_ylabel("X")
+f4_ax1.plot(local_position["timestamp"],local_position["x"],color='blue')
+f4_ax1.plot(set_point_position["timestamp"],set_point_position["x"],'r--',label="position_x reference")
+
+f4_ax2.set_xlabel('time stamp')
+f4_ax2.set_ylabel("Y")
+f4_ax2.plot(local_position["timestamp"],local_position["y"],color='blue')
+f4_ax2.plot(set_point_position["timestamp"],set_point_position["y"],'r--',label="position_y reference")
+
+fig4.suptitle('Heading and X,Y psitions')
+
+
+
+
+fig = plt.figure()
+ax = plt.subplot()
+ax.set_title("Position from px4")
+ax.set_xlabel('stamp')
+ax.set_ylabel("Position X")
+# ax.set_xlim([limL,limR])
+l1, = ax.plot(local_position["timestamp"],local_position["x"],color='orange',label="position_x")
+l2, = ax.plot(local_position["timestamp"],local_position["y"],color='red',label="position_y")
+l3, = ax.plot(local_position["timestamp"],local_position["z"],color='blue',label="position_z")
+# l4, = ax.plot(estimator_position["timestamp"],estimator_position["x"],color='green',label="estimator_position_x")
+# l5, = ax.plot(estimator_position2["timestamp"],estimator_position2["x"],color='green',label="estimator_position_x 2")
+
+ax.legend(handles=[l1,l2,l3])
+ax.set_xlim(5, 27)
+plt.grid()
+
+
+
 plt.show()
+
+
