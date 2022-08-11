@@ -22,7 +22,7 @@ ROS px4 and mocap code for flying and connecting.
   * Download Linux | Linux.org
   * Download Linux | Linux.org
 - Install Linux inside virtual box
-> Note bla bla bla
+> **Note** bla bla bla
 
 #### Installing ROS on linux desktop
 - Open virtual box
