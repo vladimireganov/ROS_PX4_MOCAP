@@ -1,6 +1,8 @@
 # ROS_PX4_MOCAP
 ROS px4 and mocap code for flying and connecting.
 
+> PS. if you need developer's guide click [here](./dev_guide.md)
+
 ## Table of Contents
 1. [Installation Guide](#installation-guide).
 2. Configuration Guide
