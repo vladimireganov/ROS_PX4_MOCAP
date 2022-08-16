@@ -31,16 +31,8 @@ local_pos = "estimator "
 sp = "set point"
 # set_way_points = read_data("large_scale_traj_optimizer-main/example1/src/trajectory.csv")
 # set_point = read_data("analysis/target_position.csv")
-# local_position.dropna(inplace=True)
-# set_point_position.dropna(inplace=True)
-# estimator_position.dropna(inplace=True)
-# estimator_position2.dropna(inplace=True)
-# visual_position.dropna(inplace=True)
-
 
 # print(local_position["timestamp"][0],set_point_position["timestamp"][0],estimator_position["timestamp"][0],visual_position["timestamp"][0])
-
-
 
 estimator_position["timestamp"] = estimator_position["timestamp"] - set_point_position["timestamp"][0]
 estimator_position2["timestamp"] = estimator_position2["timestamp"] - set_point_position["timestamp"][0]
@@ -76,9 +68,17 @@ set_point_position["x_error"] = set_point_position["x"] - local_position["x"]
 set_point_position["y_error"] = set_point_position["y"] - local_position["y"]
 set_point_position["z_error"] = set_point_position["z"] - local_position["z"]
 
-local_position["x_error_mocap"] = local_position["x"] - visual_position["x"]
-local_position["y_error_mocap"] = local_position["y"] - visual_position["y"]
-local_position["z_error_mocap"] = local_position["z"] - visual_position["z"]
+
+visual_position["x_error_sp"] = set_point_position["x"] - visual_position["x"]
+visual_position["y_error_sp"] = set_point_position["y"] - visual_position["y"]
+visual_position["z_error_sp"] = set_point_position["z"] - visual_position["z"]
+
+visual_position["x_error_mocap"] = local_position["x"] - visual_position["x"]
+visual_position["y_error_mocap"] = local_position["y"] - visual_position["y"]
+visual_position["z_error_mocap"] = local_position["z"] - visual_position["z"]
+
+
+
 
 print(local_position["freq"].describe())
 print(set_point_position["freq"].describe())
@@ -322,7 +322,9 @@ ax.set_ylabel("Position X")
 # ax.set_xlim([limL,limR])
 l1, = ax.plot(set_point_position["timestamp"],set_point_position["x_error"],color='orange',label="error")
 # l2, = ax.plot(local_position["timestamp"],local_position["x_error_mocap"],color='green',label="visual error")
-ax.legend(handles=[l1])
+l2, = ax.plot(visual_position["timestamp"],visual_position["x_error_sp"],color='green',label="visual sp error")
+l3, = ax.plot(visual_position["timestamp"],visual_position["x_error_mocap"],color='red',label="visual error")
+ax.legend(handles=[l1,l2,l3])
 plt.grid()
 
 # Position Y error
@@ -333,8 +335,9 @@ ax.set_xlabel('time (s)')
 ax.set_ylabel("Position Y")
 # ax.set_xlim([limL,limR])
 l1, = ax.plot(set_point_position["timestamp"],set_point_position["y_error"],color='orange',label="estimator error")
-# l2, = ax.plot(local_position["timestamp"],local_position["y_error_mocap"],color='green',label="visual error")
-ax.legend(handles=[l1])
+l2, = ax.plot(visual_position["timestamp"],visual_position["y_error_sp"],color='green',label="visual sp error")
+l3, = ax.plot(visual_position["timestamp"],visual_position["y_error_mocap"],color='red',label="visual error")
+ax.legend(handles=[l1,l2,l3])
 plt.grid()
 
 
@@ -378,6 +381,7 @@ ax.set_ylabel("Position X")
 l1, = ax.plot(local_position["timestamp"],local_position["x"],color='orange',label=local_pos+"position_x")
 l2, = ax.plot(local_position["timestamp"],local_position["y"],color='red',label=local_pos+"position_y")
 l3, = ax.plot(local_position["timestamp"],local_position["z"],color='blue',label=local_pos+"position_z")
+
 # l4, = ax.plot(estimator_position["timestamp"],estimator_position["x"],color='green',label="estimator_position_x")
 # l5, = ax.plot(estimator_position2["timestamp"],estimator_position2["x"],color='green',label="estimator_position_x 2")
 
@@ -401,6 +405,35 @@ ax.legend(handles=[l1,l2,l3,l4])
 plt.grid()
 
 
+
+
+
+
+fig4 = plt.figure(constrained_layout=True)
+spec2 = gridspec.GridSpec(ncols=1, nrows=3, figure=fig4)
+f4_ax0 = fig4.add_subplot(spec2[0])
+plt.grid()
+f4_ax1 = fig4.add_subplot(spec2[1])
+plt.grid()
+f4_ax2 = fig4.add_subplot(spec2[2])
+plt.grid()
+
+
+l1, = f4_ax0.plot(local_position["timestamp"],local_position["z"],color='orange',label=local_pos + "heading")
+f4_ax0.set_ylabel("z m")
+f4_ax0.set_xlabel('time (s)')
+
+f4_ax1.set_xlabel('time (s)')
+f4_ax1.set_ylabel("z m/s")
+f4_ax1.plot(local_position["timestamp"],local_position["vz"],color='blue')
+f4_ax1.plot(set_point_position["timestamp"],set_point_position["vz"],'r--',label="velocity z reference")
+
+f4_ax2.set_xlabel('time (s)')
+f4_ax2.set_ylabel("z m/s^2")
+f4_ax2.plot(local_position["timestamp"],local_position["az"],color='blue')
+f4_ax2.plot(set_point_position["timestamp"],set_point_position["acceleration[2]"],'r--',label="accelerattion z reference")
+
+fig4.suptitle('Z profile')
+
+
 plt.show()
-
-
