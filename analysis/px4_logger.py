@@ -15,10 +15,10 @@ def read_data(file):
 # path = "E:/px4_data/flight_logs/log_43_2022-6-14-13-40-30"
 # path = "E:/px4_data/flight_logs/log_0_2022-6-17-05-56-16"
 
-# path = "E:/px4_data/faster_logging/log/2022-06-20/17_47_08" # weird flight
-# path = "E:/px4_data/faster_logging/log/2022-06-20/17_51_47"
+# path = "E:/px4_data/faster_logging/log/2022-06-20/17_47_08/17_47_08" # weird flight
+path = "E:/px4_data/faster_logging/log/2022-06-20/17_51_47/17_51_47"
 
-path = "E:/px4_data/weird_behavior/18_23_19/18_23_19" #crashed
+# path = "E:/px4_data/weird_behavior/18_23_19/18_23_19" #crashed
 # path = "E:/px4_data/weird_behavior/18_19_52/18_19_52"
 # "E:\px4_data\faster_logging\log\2022-06-20\17_47_08.ulg"
 
@@ -210,7 +210,7 @@ ax.set_title("Heading from px4")
 ax.set_xlabel('time (s)')
 ax.set_ylabel("heading")
 # ax.set_xlim([limL,limR])
-l1, = ax.plot(local_position["timestamp"],local_position["heading"],color='orange',label=local_pos+"heading")
+l1, = ax.plot(local_position["timestamp"],local_position["yaw"],color='orange',label=local_pos+"heading")
 l2, = ax.plot(set_point_position["timestamp"],set_point_position["yaw"],color='red',label="heading reference")
 
 ax.legend(handles=[l1,l2])

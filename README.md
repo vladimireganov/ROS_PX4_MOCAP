@@ -29,7 +29,10 @@ ROS px4 and mocap code for flying and connecting.
 - Open virtual box
 - Install ROS noetic packages following guidelines [link](http://wiki.ros.org/noetic/Installation/Ubuntu)
 - There are some caveats, when installing, there might not be available keys for ROS, so check sources
-- Install mocap package for ROS
+
+> Or simply run  `$ sh install_ros.sh` .  This is script that automatically installs 'ROS' on the desktop computer
+
+#### Install mocap package for ROS
 > `$ sudo apt-get install ros-noetic-mocap-optitrack`
 
 > Ros – means ros package
