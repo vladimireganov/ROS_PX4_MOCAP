@@ -1,6 +1,7 @@
 #!/bin/bash
 # NOTE : Quote it else use array to avoid problems #
-FILES="/Volumes/GAMEZ/px4_data/faster_logging/log/2022-06-20/*"
+# FILES="/Volumes/GAMEZ/px4_data/faster_logging/log/2022-06-20/*"
+FILES="/Volumes/GAMEZ/px4_data/weird_behavior/*"
 for f in $FILES
 do
   echo "$f"
