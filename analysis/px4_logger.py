@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import pandas as pd
+import numpy as np
 
 def read_data(file):
     return pd.read_csv(file,sep=",")
@@ -15,7 +16,10 @@ def read_data(file):
 # path = "E:/px4_data/flight_logs/log_0_2022-6-17-05-56-16"
 
 # path = "E:/px4_data/faster_logging/log/2022-06-20/17_47_08" # weird flight
-path = "E:/px4_data/faster_logging/log/2022-06-20/17_51_47"
+# path = "E:/px4_data/faster_logging/log/2022-06-20/17_51_47"
+
+path = "E:/px4_data/weird_behavior/18_23_19/18_23_19" #crashed
+# path = "E:/px4_data/weird_behavior/18_19_52/18_19_52"
 # "E:\px4_data\faster_logging\log\2022-06-20\17_47_08.ulg"
 
 local_position = read_data(path +"_vehicle_local_position_0.csv")
@@ -77,8 +81,8 @@ visual_position["x_error_mocap"] = local_position["x"] - visual_position["x"]
 visual_position["y_error_mocap"] = local_position["y"] - visual_position["y"]
 visual_position["z_error_mocap"] = local_position["z"] - visual_position["z"]
 
-
-
+local_position["yaw"] = local_position["heading"] / np.pi * 180
+set_point_position["yaw"] = set_point_position["yaw"] / np.pi * 180
 
 print(local_position["freq"].describe())
 print(set_point_position["freq"].describe())
@@ -353,7 +357,9 @@ f4_ax2 = fig4.add_subplot(spec2[2])
 plt.grid()
 
 
-l1, = f4_ax0.plot(local_position["timestamp"],local_position["heading"],color='orange',label=local_pos + "heading")
+# l1, = f4_ax0.plot(local_position["timestamp"],local_position["heading"],color='orange',label=local_pos + "heading")
+l1, = f4_ax0.plot(local_position["timestamp"],local_position["yaw"],color='blue',label=local_pos + "heading")
+l2, = f4_ax0.plot(set_point_position["timestamp"],set_point_position["yaw"],'r--',label=sp + "heading")
 f4_ax0.set_ylabel("Heading")
 f4_ax0.set_xlabel('time (s)')
 
