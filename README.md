@@ -75,15 +75,15 @@ in order to compile you have to be in root directory of the project
 ### Setting ROS upon multiple machines
 Desktop
 
-`$export ROS_MASTER_URI=‘http://172.19.90.34:11311’`
+`$ export ROS_MASTER_URI=‘http://172.19.90.34:11311’`
 
-`$export ROS_IP=172.19.90.34`
+`$ export ROS_IP=172.19.90.34`
 
 RPi
 
-`$export ROS_MASTER_URI=‘http://172.19.90.34:11311’`
+`$ export ROS_MASTER_URI=‘http://172.19.90.34:11311’`
 
-`$export ROS_IP=172.19.90.64`
+`$ export ROS_IP=172.19.90.64`
 
 > Host will have both ip addresses the same, client will have ROS_MASTER_URI the same as host, ROS_IP as the client ip address
 
@@ -112,21 +112,21 @@ First, move to the directory of "mocap.yaml" file
 # Running code
 On main machine (in separate tabs each command)
  
- `$roscore`
+ `$ roscore`
  
- `$roslaunch mocap_optitrack mocap.launch –screen`
+ `$ roslaunch mocap_optitrack mocap.launch –screen`
  
- `$rosrun listener test.py`
+ `$ rosrun listener test.py`
  
- `$rosrun arm test_trajectory_NED`
+ `$ rosrun arm test_trajectory_NED`
  
 On Rpi
 
- `$roslaunch mavros px.launch`
+ `$ roslaunch mavros px.launch`
 
 # Working with a tool
 
-#### Code structure
+### Code structure
 - include/
 
     - api.hpp – contains main class for working with drone
@@ -140,3 +140,8 @@ On Rpi
  - src/
 
     - test_trajectory.cpp – main code
+
+
+### Data analysis
+
+> Will be added later
