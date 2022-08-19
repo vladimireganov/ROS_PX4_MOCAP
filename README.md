@@ -1,7 +1,7 @@
 # ROS_PX4_MOCAP
 ROS px4 and mocap code for flying and connecting.
 
-> PS. if you need developer's guide click [here](./dev_guide.md)
+<!-- > PS. if you need developer's guide click [here](./dev_guide.md) -->
 
 > **Note** '$' - this symbol means that commnad should be executed in the console
 
