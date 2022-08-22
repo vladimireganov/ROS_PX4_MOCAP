@@ -178,6 +178,10 @@ api::api(int argc, char **argv)
 
     set_point_raw_pub = nh.advertise<mavros_msgs::PositionTarget> // publisher for set point
             ("mavros/setpoint_raw/local", 10);
+
+    px4_pos = nh.subscribe<geometry_msgs::PoseStamped>("/mavros/local_position/pose",1,get_px4_pos);
+
+
     land_cmd.request.yaw = 0.0;
     land_cmd.request.latitude = 0;
     land_cmd.request.longitude = 0;
