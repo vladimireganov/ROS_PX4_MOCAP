@@ -2,6 +2,7 @@
     "files.associations": {
         "xstring": "cpp",
         "vector": "cpp",
-        "__node_handle": "cpp"
+        "__node_handle": "cpp",
+        "random": "cpp"
     }
 }

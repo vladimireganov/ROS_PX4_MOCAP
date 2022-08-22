@@ -29,8 +29,11 @@
 static void state_cb(const mavros_msgs::State::ConstPtr& msg); //callback function for current state
 static void get_pos(const geometry_msgs::PoseStamped::ConstPtr& msg); // callback function for current positon
 
+static void get_px4_pos(const geometry_msgs::PoseStamped::ConstPtr& msg); // local position
+
 static mavros_msgs::State current_state;
 static geometry_msgs::PoseStamped current_position;
+static geometry_msgs::PoseStamped px4_position; // px4 feedback position
 
 File_write logger;
 
@@ -63,6 +66,7 @@ private:
     // ros topics and services
     ros::Subscriber state_sub; // subcribing to current state
     ros::Subscriber pos; // subcribing to current position 
+    ros::Subscriber px4_pos; //subscribing to px4 feedback position
     ros::Publisher local_pos_pub; // publising local position?
     ros::Publisher set_point_raw_pub; // publising set point
     ros::ServiceClient arming_client; //service for arming
@@ -111,7 +115,7 @@ public:
     void set_home(); // sets home position
     // void refresh_set_point(); // refreshes set point to current location
     void refresh_set_point_NED();
-    void reset(); // reset???
+    // void reset(); // reset???
     // void march();  /// applying all changes anf flying
 
     void march_NED();  /// applying all changes anf flying
@@ -217,6 +221,12 @@ void get_pos(const geometry_msgs::PoseStamped::ConstPtr& msg){
     logger.save_data(current_position);
     // ROS_INFO_STREAM("current_position: " << current_position);
 }
+
+void get_px_pos(const geometry_msgs::PoseStamped::ConstPtr& msg){
+    px4_position = *msg;
+}
+
+
 /*
     * function to arm the drone
     * @return - true/false if arming was sucessful
@@ -450,13 +460,24 @@ void api::get_position(){
 void api::get_position_ret(float &x,float &y,float &z,float &yaw ){
     position = current_position;
     // tf2::Matrix3x3().getRPY(roll, pitch, yaw);
-    tf2::Quaternion q;
+    static tf2::Quaternion q;
     tf2::fromMsg(current_position.pose.orientation,q);
     tf2::Matrix3x3(q).getRPY(this->roll, this->pitch, this->yaw); //extract roll pitch yaw from current position
     x = position.pose.position.x;
     y = position.pose.position.y;
     z = position.pose.position.z;
     yaw = this->yaw;
+}
+
+/*
+* helper function to extract px4 orientation
+* receives pointer where to extract data
+*/
+void api::get_px4_yaw(float &yaw ){
+    static tf2::Quaternion q;
+    static float roll, pitch;
+    tf2::fromMsg(px4_position.pose.orientation,q);
+    tf2::Matrix3x3(q).getRPY(roll, pitch, yaw);
 }
 
 
