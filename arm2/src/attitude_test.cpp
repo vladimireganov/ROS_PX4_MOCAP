@@ -106,7 +106,7 @@ int main(int argc, char **argv){
 
 
     api my_drone = api(argc, argv); //initialize class to work with drone
-    float x,y,z,yaw;
+    double x,y,z,yaw;
     Eigen::Vector3d position;
 
     while (!firstDataFlag){
