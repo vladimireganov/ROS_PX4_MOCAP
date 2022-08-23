@@ -32,7 +32,7 @@ static void get_pos(const geometry_msgs::PoseStamped::ConstPtr& msg); // callbac
 static void get_px4_pos(const geometry_msgs::PoseStamped::ConstPtr& msg); // local position
 
 static mavros_msgs::State current_state;
-static geometry_msgs::PoseStamped current_position;
+static geometry_msgs::PoseStamped current_position; // MOCAP position
 static geometry_msgs::PoseStamped px4_position; // px4 feedback position
 
 File_write logger;
@@ -212,7 +212,9 @@ api::~api()
 */
 void state_cb(const mavros_msgs::State::ConstPtr& msg){
     current_state = *msg;
+    #ifdef LOGING
     logger.save_data(current_state);
+    #endif
     // ROS_INFO("%f\n",current_state);
 }
 /*
@@ -222,7 +224,9 @@ void get_pos(const geometry_msgs::PoseStamped::ConstPtr& msg){
     current_position = *msg;
     firstDataFlag = true;
     //ROS_INFO("Position updated");
+    #ifdef LOGING
     logger.save_data(current_position);
+    #endif
     // ROS_INFO_STREAM("current_position: " << current_position);
 }
 
@@ -238,8 +242,14 @@ void get_px_pos(const geometry_msgs::PoseStamped::ConstPtr& msg){
 bool api::arm(){
     arm_cmd.request.value = true;
     if( arming_client.call(arm_cmd) && arm_cmd.response.success){
+        #ifdef DEBUG
         ROS_INFO("Vehicle armed");
+        #endif
+
+        #ifdef LOGING
         logger.save_data(current_state);
+        #endif
+
         return true;
     }
     else return false;
@@ -252,8 +262,14 @@ bool api::arm(){
 bool api::disarm(){
     arm_cmd.request.value = false;
     if( arming_client.call(arm_cmd) && arm_cmd.response.success){
+        #ifdef DEBUG
         ROS_INFO("Vehicle disarmed");
+        #endif
+
+        #ifdef LOGING
         logger.save_data(current_state);
+        #endif
+
         return true;
     }
     else return false;
@@ -289,8 +305,15 @@ bool api::set_mode(std::string mode){
     offb_set_mode.request.custom_mode = "OFFBOARD";
     if( set_mode_client.call(offb_set_mode) &&
                 offb_set_mode.response.mode_sent){
+
+                #ifdef DEBUG
                 ROS_INFO("Offboard enabled");
+                #endif
+
+                #ifdef LOGING
                 logger.save_data(current_state);
+                #endif
+
                 return true;
     }
     else{
@@ -305,9 +328,14 @@ bool api::set_mode(std::string mode){
 
 void api::take_off_NED(float altitude){
     set_point_raw.position.z -= altitude;
+    #ifdef DEBUG
     ROS_INFO_STREAM("altitude: " << altitude);
     ROS_INFO_STREAM("target altitude: " << set_point_raw.position.z);
+    #endif
+
+    #ifdef LOGING
     logger.save_data(current_state);
+    #endif
 }
 
 
@@ -315,7 +343,10 @@ void api::take_off_NED(float altitude){
 void api::march_NED(){
     set_point_raw.header.stamp = ros::Time::now();
     set_point_raw_pub.publish(set_point_raw);
+    #ifdef LOGING
     logger.save_data(set_point_raw);
+    #endif
+    
     ros::spinOnce();
     rate.sleep();
 }
@@ -326,9 +357,13 @@ void api::refresh_set_point_NED(){
     set_point_raw.position.x = current_position.pose.position.x;
     set_point_raw.position.y = current_position.pose.position.y;
     set_point_raw.position.z = current_position.pose.position.z;
-    ROS_INFO_STREAM("current_position: " << current_position);
+    #ifdef LOGING
     logger.save_data(set_point_raw);
     logger.save_data(current_position);
+    #endif
+    #ifdef DEBUG
+    ROS_INFO_STREAM("current_position: " << current_position);
+    #endif
 
 }
 
@@ -338,9 +373,8 @@ void api::set_point_NED (float x, float y , float z){
     set_point_raw.position.x += x;
     set_point_raw.position.y -= y;
     set_point_raw.position.z -= z;
-    
-    #ifdef DEBUG
-
+    #ifdef LOGING
+    logger.save_data(set_point_raw);
     #endif
 }
 
@@ -349,35 +383,48 @@ void api::set_point_NED (float x, float y , float z){
 void api::set_point_NED(float x, float y){
     set_point_raw.position.x += x;
     set_point_raw.position.y -= y;
+    #ifdef LOGING
     logger.save_data(set_point_raw);
+    #endif
 }
 
 void api::set_global_point(float x, float y){
     set_point_raw.position.x = x;
     set_point_raw.position.y = -y;
+    #ifdef LOGING
     logger.save_data(set_point_raw);
+    #endif
 }
 void api::set_global_point(float x, float y, float z){
     set_point_raw.position.x = x;
     set_point_raw.position.y = -y;
     set_point_raw.position.z = -z;
+    #ifdef LOGING
     logger.save_data(set_point_raw);
+    #endif
 }
 
 void api::set_point_NED_global(float x, float y, float z){
     set_point_raw.position.x = home.pose.position.x + x;
     set_point_raw.position.y = home.pose.position.y - y;
     set_point_raw.position.z = home.pose.position.z - z;
+    #ifdef LOGING
     logger.save_data(set_point_raw);
+    #endif
+    
 }
 void api::set_point_NED_global(float x, float y){
     set_point_raw.position.x = home.pose.position.x + x;
     set_point_raw.position.y = home.pose.position.y - y;
+    #ifdef LOGING
     logger.save_data(set_point_raw);
+    #endif
 }
 
 
-
+/*
+    * function to set home using MOCAP data
+*/
 void api::set_home(){
     home.pose.position.x = current_position.pose.position.x;
     home.pose.position.y = current_position.pose.position.y;
@@ -387,7 +434,10 @@ void api::set_home(){
     home.pose.orientation.z = current_position.pose.orientation.z;
     home.pose.orientation.w = current_position.pose.orientation.w;
     // home = current_position;
+    #ifdef LOGING
     logger.save_data(current_position);
+    #endif
+
     #ifdef DEBUG
     ROS_INFO_STREAM("home position: " << home);
     ROS_INFO_STREAM("current position: " << current_position);
@@ -400,10 +450,39 @@ void api::set_home(){
     #endif
     
 }
+
+/*
+    * function to set home using px4 data
+*/
+void api::set_home_px4(){
+    home.pose.position.x = px4_position.pose.position.x;
+    home.pose.position.y = px4_position.pose.position.y;
+    home.pose.position.z = px4_position.pose.position.z;
+    home.pose.orientation.x = px4_position.pose.orientation.x;
+    home.pose.orientation.y = px4_position.pose.orientation.y;
+    home.pose.orientation.z = px4_position.pose.orientation.z;
+    home.pose.orientation.w = px4_position.pose.orientation.w;
+    // home = current_position;
+    
+    #ifdef DEBUG
+    logger.save_data(px4_position);
+    ROS_INFO_STREAM("home position: " << home);
+    ROS_INFO_STREAM("current position: " << px4_position);
+    // ROS_INFO("home position x: %lf",home.pose.position.x);
+    // ROS_INFO("home position y: %lf",home.pose.position.y);
+    // ROS_INFO("home position z: %lf\n",home.pose.position.z);
+    // ROS_INFO("current_position position x: %lf",current_position.pose.position.x);
+    // ROS_INFO("current_position position y: %lf",current_position.pose.position.y);
+    // ROS_INFO("current_position position z: %lf\n",current_position.pose.position.z);
+    #endif
+    
+}
+
+
 /*
     * function to check if destination reached
+    * uses data from MOCAP
 */
-
 bool api::reached_point_NED(){
     float dx = set_point_raw.position.x - current_position.pose.position.x ;
     float dy = set_point_raw.position.y - current_position.pose.position.y ;
@@ -415,6 +494,23 @@ bool api::reached_point_NED(){
     // logger.save_data(&current_position);
     return  sqrt (dx * dx + dy * dy + dz * dz)  < dest_threshold;
 }
+
+/*
+    * function to check if destination reached
+    * takes into consideration data received from px4
+*/
+bool api::reached_point_px4(){
+    float dx = set_point_raw.position.x - px4_position.pose.position.x ;
+    float dy = set_point_raw.position.y - px4_position.pose.position.y ;
+    float dz = set_point_raw.position.z - px4_position.pose.position.z ;
+    #ifdef DEBUG
+    ROS_INFO_STREAM("set point: " << set_point_raw);
+    ROS_INFO_STREAM("current position: " << px4_position);
+    #endif
+    // logger.save_data(&current_position);
+    return  sqrt (dx * dx + dy * dy + dz * dz)  < dest_threshold;
+}
+
 
 
 void api::set_timer(double delta){
@@ -431,7 +527,9 @@ bool api::check_timer(){
 void api::land(){
     land_client.call(land_cmd);
     logger.save_data(current_state);
-
+    #ifdef DEBUG
+    ROS_INFO_STREAM("land cmd invoked: ");
+    #endif
 }
 
 void api::set_heading_offset(float yaw){
@@ -455,6 +553,9 @@ void api::get_position(){
     tf2::Quaternion q;
     tf2::fromMsg(current_position.pose.orientation,q);
     tf2::Matrix3x3(q).getRPY(roll, pitch, yaw); //extract roll pitch yaw from current position
+    #ifdef DEBUG
+    ROS_INFO_STREAM("extracted yaw: " << yaw);
+    #endif
 }
 
 /*
@@ -471,6 +572,9 @@ void api::get_position_ret(float &x,float &y,float &z,float &yaw ){
     y = position.pose.position.y;
     z = position.pose.position.z;
     yaw = this->yaw;
+    #ifdef DEBUG
+    ROS_INFO_STREAM("extracted yaw: " << yaw);
+    #endif
 }
 
 /*
@@ -482,6 +586,9 @@ void api::get_px4_yaw(float &yaw ){
     static float roll, pitch;
     tf2::fromMsg(px4_position.pose.orientation,q);
     tf2::Matrix3x3(q).getRPY(roll, pitch, yaw);
+    #ifdef DEBUG
+    ROS_INFO_STREAM("extracted yaw: " << yaw);
+    #endif
 }
 
 
