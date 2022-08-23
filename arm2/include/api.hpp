@@ -144,6 +144,10 @@ public:
 
     void get_position_ret(float &x,float &y,float &z,float &yaw ); // function for sending position and orientation to the user
     /// experimental finish
+
+    void get_px4_yaw(float &yaw );
+    bool reached_point_px4();
+    void set_home_px4();
 };
 
 
