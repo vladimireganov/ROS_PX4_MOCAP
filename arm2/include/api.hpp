@@ -145,7 +145,7 @@ public:
     void get_position_ret(float &x,float &y,float &z,float &yaw ); // function for sending position and orientation to the user
     /// experimental finish
 
-    void get_px4_yaw(float &yaw );
+    void get_px4_yaw(double &yaw );
     bool reached_point_px4();
     void set_home_px4();
 };
@@ -234,7 +234,7 @@ void get_pos(const geometry_msgs::PoseStamped::ConstPtr& msg){
     // ROS_INFO_STREAM("current_position: " << current_position);
 }
 
-void get_px_pos(const geometry_msgs::PoseStamped::ConstPtr& msg){
+void get_px4_pos(const geometry_msgs::PoseStamped::ConstPtr& msg){
     px4_position = *msg;
 }
 
@@ -585,9 +585,9 @@ void api::get_position_ret(float &x,float &y,float &z,float &yaw ){
 * helper function to extract px4 orientation
 * receives pointer where to extract data
 */
-void api::get_px4_yaw(float &yaw ){
+void api::get_px4_yaw(double &yaw ){
     static tf2::Quaternion q;
-    static float roll, pitch;
+    static double roll, pitch;
     tf2::fromMsg(px4_position.pose.orientation,q);
     tf2::Matrix3x3(q).getRPY(roll, pitch, yaw);
     #ifdef DEBUG
