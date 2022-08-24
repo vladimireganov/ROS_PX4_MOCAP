@@ -106,7 +106,7 @@ int main(int argc, char **argv){
 
 
     api my_drone = api(argc, argv); //initialize class to work with drone
-    double x,y,z,yaw;
+    float x,y,z,yaw;
     Eigen::Vector3d position;
 
     while (!firstDataFlag){
@@ -117,9 +117,10 @@ int main(int argc, char **argv){
     
     my_drone.refresh_set_point_NED(); // init set_point to current state
     
-    my_drone.get_position();
+    // my_drone.get_position();
     
-    my_drone.get_px4_yaw(yaw);
+    // my_drone.get_px4_yaw(yaw);
+    my_drone.get_position_ret(x,y,z,yaw);
     my_drone.set_heading_global(yaw);
     // my_drone.take_off_2(1);
     for (int i = 0; i < 100; i++) // send a few initial set points before continueing
@@ -139,7 +140,7 @@ int main(int argc, char **argv){
     while(ros::ok() && !my_drone.reached_point_NED()){ //while loop for main program
         my_drone.march_NED();//spin code (publish set points)
     }
-
+    
     ROS_INFO("Take off completed\n");
     // my_drone.set_home();
 
@@ -155,6 +156,8 @@ int main(int argc, char **argv){
     // }
 
     // my_drone.landing();
+    my_drone.set_timer(15.0);
+    while ( ! my_drone.check_timer() && ros::ok()){}
     my_drone.land();
 
     my_drone.set_timer(5.0);

@@ -558,7 +558,7 @@ void api::get_position(){
     tf2::fromMsg(current_position.pose.orientation,q);
     tf2::Matrix3x3(q).getRPY(roll, pitch, yaw); //extract roll pitch yaw from current position
     #ifdef DEBUG
-    ROS_INFO_STREAM("extracted yaw: " << yaw);
+    ROS_INFO_STREAM("extracted yaw: " << yaw * 180 / 3.14);
     #endif
 }
 
@@ -577,7 +577,7 @@ void api::get_position_ret(float &x,float &y,float &z,float &yaw ){
     z = position.pose.position.z;
     yaw = this->yaw;
     #ifdef DEBUG
-    ROS_INFO_STREAM("extracted yaw: " << yaw);
+    ROS_INFO_STREAM("extracted yaw: " << yaw * 180 / 3.14);
     #endif
 }
 
@@ -585,13 +585,13 @@ void api::get_position_ret(float &x,float &y,float &z,float &yaw ){
 * helper function to extract px4 orientation
 * receives pointer where to extract data
 */
-void api::get_px4_yaw(double &yaw ){
+void api::get_px4_yaw(double &my_yaw ){
     static tf2::Quaternion q;
     static double roll, pitch;
     tf2::fromMsg(px4_position.pose.orientation,q);
-    tf2::Matrix3x3(q).getRPY(roll, pitch, yaw);
+    tf2::Matrix3x3(q).getRPY(roll, pitch, my_yaw);
     #ifdef DEBUG
-    ROS_INFO_STREAM("extracted yaw: " << yaw);
+    ROS_INFO_STREAM("px4 extracted yaw: " << my_yaw * 180 / 3.14);
     #endif
 }
 
