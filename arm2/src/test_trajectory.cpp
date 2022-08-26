@@ -148,13 +148,16 @@ int main(int argc, char **argv){
         position =  minSnapTraj.getPos(i);
         my_drone.set_point_NED_global(position[0],position[1],position[2]);
         my_drone.set_heading_offset(0);
-        my_drone.set_timer(0.1);
+        my_drone.set_timer(0.05);
         while(ros::ok() && ! my_drone.check_timer()){ //while loop for main program
             my_drone.march_NED();//spin code (publish set points)
         }
     }
 
     // my_drone.landing();
+    // Lets drone to hold and finish trajectory before landing
+    my_drone.set_timer(7.0);
+    while ( ! my_drone.check_timer() && ros::ok()){my_drone.march_NED();}
     my_drone.land();
 
     my_drone.set_timer(7.0);
