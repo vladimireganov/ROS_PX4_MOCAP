@@ -213,8 +213,8 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-# add_executable(arm_flight src/arm2.cpp)
-# target_link_libraries(arm_flight ${catkin_LIBRARIES})
+add_executable(arm_flight src/arm2.cpp) 
+target_link_libraries(arm_flight ${catkin_LIBRARIES})
 
 # add_executable(arm_test src/test_arm.cpp)
 # target_link_libraries(arm_test ${catkin_LIBRARIES})
@@ -222,8 +222,8 @@ include_directories(
 # add_executable(class_test src/test_class.cpp) #main code for flying
 # target_link_libraries(class_test ${catkin_LIBRARIES})
 
-# add_executable(attitude_test src/attitude_test.cpp) #code for testing
-# target_link_libraries(attitude_test ${catkin_LIBRARIES})
+add_executable(attitude_test src/attitude_test.cpp) #code for testing
+target_link_libraries(attitude_test ${catkin_LIBRARIES})
 
 add_executable(test_class_NED src/test_class_NED.cpp) #code for testing
 target_link_libraries(test_class_NED ${catkin_LIBRARIES})

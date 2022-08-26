@@ -91,7 +91,7 @@ int main(int argc, char **argv){
 
     iS.col(0) << route.leftCols<1>();
     fS.col(0) << route.rightCols<1>();
-    ts = allocateTime(route, 3.0, 3.0); // current time allocation is 3 m/s and 3 m/s^2
+    ts = allocateTime(route, 3.0, 2.0); // current time allocation is 3 m/s and 3 m/s^2
 
     iSS << iS, Eigen::MatrixXd::Zero(3, 1);
     fSS << fS, Eigen::MatrixXd::Zero(3, 1);
@@ -144,20 +144,23 @@ int main(int argc, char **argv){
     my_drone.set_home();
 
 
-    for (double i = 0; i < minSnapTraj.getTotalDuration(); i+= 0.01){
+    for (double i = 0; i < minSnapTraj.getTotalDuration(); i+= 0.08){
         position =  minSnapTraj.getPos(i);
         my_drone.set_point_NED_global(position[0],position[1],position[2]);
         my_drone.set_heading_offset(0);
-        my_drone.set_timer(0.01);
+        my_drone.set_timer(0.05);
         while(ros::ok() && ! my_drone.check_timer()){ //while loop for main program
             my_drone.march_NED();//spin code (publish set points)
         }
     }
 
     // my_drone.landing();
+    // Lets drone to hold and finish trajectory before landing
+    my_drone.set_timer(7.0);
+    while ( ! my_drone.check_timer() && ros::ok()){my_drone.march_NED();}
     my_drone.land();
 
-    my_drone.set_timer(5.0);
+    my_drone.set_timer(7.0);
     while ( ! my_drone.check_timer() && ros::ok()){}
     ROS_INFO("Landed:\n");
     my_drone.disarm();

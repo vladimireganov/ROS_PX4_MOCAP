@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import pandas as pd
+import numpy as np
 
 def read_data(file):
     return pd.read_csv(file,sep=",")
@@ -14,8 +15,13 @@ def read_data(file):
 # path = "E:/px4_data/flight_logs/log_43_2022-6-14-13-40-30"
 # path = "E:/px4_data/flight_logs/log_0_2022-6-17-05-56-16"
 
-# path = "E:/px4_data/faster_logging/log/2022-06-20/17_47_08" # weird flight
-path = "E:/px4_data/faster_logging/log/2022-06-20/17_51_47"
+# path = "E:/px4_data/faster_logging/log/2022-06-20/17_47_08/17_47_08" # weird flight
+
+path = "E:/px4_data/faster_logging/log/2022-08-18/19_26_25/19_26_25"
+
+
+# path = "E:/px4_data/weird_behavior/18_23_19/18_23_19" #crashed
+# path = "E:/px4_data/weird_behavior/18_19_52/18_19_52"
 # "E:\px4_data\faster_logging\log\2022-06-20\17_47_08.ulg"
 
 local_position = read_data(path +"_vehicle_local_position_0.csv")
@@ -77,8 +83,8 @@ visual_position["x_error_mocap"] = local_position["x"] - visual_position["x"]
 visual_position["y_error_mocap"] = local_position["y"] - visual_position["y"]
 visual_position["z_error_mocap"] = local_position["z"] - visual_position["z"]
 
-
-
+local_position["yaw"] = local_position["heading"] / np.pi * 180
+set_point_position["yaw"] = set_point_position["yaw"] / np.pi * 180
 
 print(local_position["freq"].describe())
 print(set_point_position["freq"].describe())
@@ -206,7 +212,7 @@ ax.set_title("Heading from px4")
 ax.set_xlabel('time (s)')
 ax.set_ylabel("heading")
 # ax.set_xlim([limL,limR])
-l1, = ax.plot(local_position["timestamp"],local_position["heading"],color='orange',label=local_pos+"heading")
+l1, = ax.plot(local_position["timestamp"],local_position["yaw"],color='orange',label=local_pos+"heading")
 l2, = ax.plot(set_point_position["timestamp"],set_point_position["yaw"],color='red',label="heading reference")
 
 ax.legend(handles=[l1,l2])
@@ -320,10 +326,9 @@ ax.set_title("Position error from px4")
 ax.set_xlabel('time (s)')
 ax.set_ylabel("Position X")
 # ax.set_xlim([limL,limR])
-l1, = ax.plot(set_point_position["timestamp"],set_point_position["x_error"],color='orange',label="error")
-# l2, = ax.plot(local_position["timestamp"],local_position["x_error_mocap"],color='green',label="visual error")
-l2, = ax.plot(visual_position["timestamp"],visual_position["x_error_sp"],color='green',label="visual sp error")
-l3, = ax.plot(visual_position["timestamp"],visual_position["x_error_mocap"],color='red',label="visual error")
+l1, = ax.plot(set_point_position["timestamp"],set_point_position["x_error"],color='orange',label="error between esimator and setpoint")
+l2, = ax.plot(visual_position["timestamp"],visual_position["x_error_sp"],color='green',label="error between mocap and setpoint")
+l3, = ax.plot(visual_position["timestamp"],visual_position["x_error_mocap"],color='blue',label="error between mocap and local position")
 ax.legend(handles=[l1,l2,l3])
 plt.grid()
 
@@ -334,9 +339,9 @@ ax.set_title("Position error from px4")
 ax.set_xlabel('time (s)')
 ax.set_ylabel("Position Y")
 # ax.set_xlim([limL,limR])
-l1, = ax.plot(set_point_position["timestamp"],set_point_position["y_error"],color='orange',label="estimator error")
-l2, = ax.plot(visual_position["timestamp"],visual_position["y_error_sp"],color='green',label="visual sp error")
-l3, = ax.plot(visual_position["timestamp"],visual_position["y_error_mocap"],color='red',label="visual error")
+l1, = ax.plot(set_point_position["timestamp"],set_point_position["y_error"],color='orange',label="error between esimator and setpoint")
+l2, = ax.plot(visual_position["timestamp"],visual_position["y_error_sp"],color='green',label="error between mocap and setpoint")
+l3, = ax.plot(visual_position["timestamp"],visual_position["y_error_mocap"],color='blue',label="error between mocap and local position")
 ax.legend(handles=[l1,l2,l3])
 plt.grid()
 
@@ -353,7 +358,9 @@ f4_ax2 = fig4.add_subplot(spec2[2])
 plt.grid()
 
 
-l1, = f4_ax0.plot(local_position["timestamp"],local_position["heading"],color='orange',label=local_pos + "heading")
+# l1, = f4_ax0.plot(local_position["timestamp"],local_position["heading"],color='orange',label=local_pos + "heading")
+l1, = f4_ax0.plot(local_position["timestamp"],local_position["yaw"],color='blue',label=local_pos + "heading")
+l2, = f4_ax0.plot(set_point_position["timestamp"],set_point_position["yaw"],'r--',label=sp + "heading")
 f4_ax0.set_ylabel("Heading")
 f4_ax0.set_xlabel('time (s)')
 

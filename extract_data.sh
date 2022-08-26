@@ -6,10 +6,6 @@ for f in $FILES
 do
   echo "$f"
   base=${f%.ulg}
-#   mkdir "$base"
   echo "$base/"
   ulog2csv -o $base/ $f 
-#   echo "$base/"
-  # take action on each file. $f store current file name
-#   cat "$f"
 done

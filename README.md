@@ -1,7 +1,7 @@
 # ROS_PX4_MOCAP
 ROS px4 and mocap code for flying and connecting.
 
-> PS. if you need developer's guide click [here](./dev_guide.md)
+<!-- > PS. if you need developer's guide click [here](./dev_guide.md) -->
 
 > **Note** '$' - this symbol means that commnad should be executed in the console
 
@@ -29,7 +29,10 @@ ROS px4 and mocap code for flying and connecting.
 - Open virtual box
 - Install ROS noetic packages following guidelines [link](http://wiki.ros.org/noetic/Installation/Ubuntu)
 - There are some caveats, when installing, there might not be available keys for ROS, so check sources
-- Install mocap package for ROS
+
+> Or simply run  `$ sh install_ros.sh` .  This is script that automatically installs 'ROS' on the desktop computer
+
+#### Install mocap package for ROS
 > `$ sudo apt-get install ros-noetic-mocap-optitrack`
 
 > Ros – means ros package
@@ -72,15 +75,15 @@ in order to compile you have to be in root directory of the project
 ### Setting ROS upon multiple machines
 Desktop
 
-`$export ROS_MASTER_URI=‘http://172.19.90.34:11311’`
+`$ export ROS_MASTER_URI=‘http://172.19.90.34:11311’`
 
-`$export ROS_IP=172.19.90.34`
+`$ export ROS_IP=172.19.90.34`
 
 RPi
 
-`$export ROS_MASTER_URI=‘http://172.19.90.34:11311’`
+`$ export ROS_MASTER_URI=‘http://172.19.90.34:11311’`
 
-`$export ROS_IP=172.19.90.64`
+`$ export ROS_IP=172.19.90.64`
 
 > Host will have both ip addresses the same, client will have ROS_MASTER_URI the same as host, ROS_IP as the client ip address
 
@@ -109,21 +112,21 @@ First, move to the directory of "mocap.yaml" file
 # Running code
 On main machine (in separate tabs each command)
  
- `$roscore`
+ `$ roscore`
  
- `$roslaunch mocap_optitrack mocap.launch –screen`
+ `$ roslaunch mocap_optitrack mocap.launch –screen`
  
- `$rosrun listener test.py`
+ `$ rosrun listener test.py`
  
- `$rosrun arm test_trajectory_NED`
+ `$ rosrun arm test_trajectory_NED`
  
 On Rpi
 
- `$roslaunch mavros px.launch`
+ `$ roslaunch mavros px.launch`
 
 # Working with a tool
 
-#### Code structure
+### Code structure
 - include/
 
     - api.hpp – contains main class for working with drone
@@ -137,3 +140,13 @@ On Rpi
  - src/
 
     - test_trajectory.cpp – main code
+
+
+### Data analysis
+
+> Will be added later
+
+### Links
+
+> add links to github for px4
+> add links for other important links
