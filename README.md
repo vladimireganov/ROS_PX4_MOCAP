@@ -5,6 +5,8 @@ ROS px4 and mocap code for flying and connecting.
 
 > **Note** '$' - this symbol means that commnad should be executed in the console
 
+> **Note** currently working code is in [px4 folder](https://github.com/vladimireganov/ROS_PX4_MOCAP/blob/f22f6e953b3ab82bf9780bbde9cd918131332230/px4)
+
 ## Table of Contents
 1. [Installation Guide](#installation-guide).
 2. [Configuration Guide](#configuration-guide)
@@ -108,6 +110,9 @@ First, move to the directory of "mocap.yaml" file
 
 ### Configuring px4 settings
 
+## px4 and mocap
+Using QGC connect to px4, then go to EKF2 settings
+[img1]()
 
 # Running code
 On main machine (in separate tabs each command)
