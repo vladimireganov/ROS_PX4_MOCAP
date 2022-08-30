@@ -8,10 +8,26 @@ ROS px4 and mocap code for flying and connecting.
 > **Note** currently working code is in [px4 folder](https://github.com/vladimireganov/ROS_PX4_MOCAP/blob/f22f6e953b3ab82bf9780bbde9cd918131332230/px4)
 
 ## Table of Contents
+0. [Required Components and Sowftware](#required-components-and-sowftware)
 1. [Installation Guide](#installation-guide).
 2. [Configuration Guide](#configuration-guide)
 3. [Running Guide](#running-code)
 4. [Working with a tool.](#working-with-a-tool)
+
+### Required Components and Sowftware:
+
+#### Components:
+
+- Raspberry Pi
+- Pixhawk
+
+
+#### Software:
+
+Motive (link)
+
+QGroundControl (QGC)
+
 
 ### Installation Guide:
 - [Installation of VM](#installation-of-vm-and-linux).
