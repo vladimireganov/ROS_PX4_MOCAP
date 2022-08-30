@@ -143,7 +143,7 @@ int main(int argc, char **argv){
     ROS_INFO("Take off completed\n");
     my_drone.set_home();
 
-
+    // trjectory 1
     for (double i = 0; i < minSnapTraj.getTotalDuration(); i+= 0.08){
         position =  minSnapTraj.getPos(i);
         my_drone.set_point_NED_global(position[0],position[1],position[2]);
@@ -153,8 +153,85 @@ int main(int argc, char **argv){
             my_drone.march_NED();//spin code (publish set points)
         }
     }
+    my_drone.set_timer(7.0);
+    while ( ! my_drone.check_timer() && ros::ok()){my_drone.march_NED();} // finishing first trajectory
 
-    // my_drone.landing();
+
+    /*
+    trajectory 2
+    begin
+    */
+    iS.setZero();
+    fS.setZero();
+
+    File_read test("/home/ros/test/src/large_scale_traj_optimizer-main/example1/src/trajectory.csv");
+    route = test.read_all_data();
+    N = (int) (route.cols()) -1;
+    iS.col(0) << route.leftCols<1>();
+    fS.col(0) << route.rightCols<1>();
+    ts = allocateTime(route, 3.0, 2.0); // current time allocation is 3 m/s and 3 m/s^2
+    iSS << iS, Eigen::MatrixXd::Zero(3, 1);
+    fSS << fS, Eigen::MatrixXd::Zero(3, 1);
+    snapOpt.reset(iSS, fSS, route.cols() - 1);
+    snapOpt.generate(route.block(0, 1, 3, N - 1), ts);
+    snapOpt.getTraj(minSnapTraj);
+    my_drone.set_home(); // flying
+    // trjectory 1
+    for (double i = 0; i < minSnapTraj.getTotalDuration(); i+= 0.08){
+        position =  minSnapTraj.getPos(i);
+        my_drone.set_point_NED_global(position[0],position[1],position[2]);
+        my_drone.set_heading_offset(0);
+        my_drone.set_timer(0.05);
+        while(ros::ok() && ! my_drone.check_timer()){ //while loop for main program
+            my_drone.march_NED();//spin code (publish set points)
+        }
+    }
+    my_drone.set_timer(7.0);
+    while ( ! my_drone.check_timer() && ros::ok()){my_drone.march_NED();} // finishing first trajectory
+    /*
+    trajectory 2 
+    end
+    */
+
+
+
+    /*
+    trajectory 3
+    begin
+    */
+    iS.setZero();
+    fS.setZero();
+
+    File_read test("/home/ros/test/src/large_scale_traj_optimizer-main/example1/src/trajectory.csv");
+    route = test.read_all_data();
+    N = (int) (route.cols()) -1;
+    iS.col(0) << route.leftCols<1>();
+    fS.col(0) << route.rightCols<1>();
+    ts = allocateTime(route, 3.0, 2.0); // current time allocation is 3 m/s and 3 m/s^2
+    iSS << iS, Eigen::MatrixXd::Zero(3, 1);
+    fSS << fS, Eigen::MatrixXd::Zero(3, 1);
+    snapOpt.reset(iSS, fSS, route.cols() - 1);
+    snapOpt.generate(route.block(0, 1, 3, N - 1), ts);
+    snapOpt.getTraj(minSnapTraj);
+    my_drone.set_home(); // flying
+    // trjectory 1
+    for (double i = 0; i < minSnapTraj.getTotalDuration(); i+= 0.08){
+        position =  minSnapTraj.getPos(i);
+        my_drone.set_point_NED_global(position[0],position[1],position[2]);
+        my_drone.set_heading_offset(0);
+        my_drone.set_timer(0.05);
+        while(ros::ok() && ! my_drone.check_timer()){ //while loop for main program
+            my_drone.march_NED();//spin code (publish set points)
+        }
+    }
+    my_drone.set_timer(7.0);
+    while ( ! my_drone.check_timer() && ros::ok()){my_drone.march_NED();} // finishing first trajectory
+    /*
+    trajectory 3
+    end
+    */
+
+
     // Lets drone to hold and finish trajectory before landing
     my_drone.set_timer(7.0);
     while ( ! my_drone.check_timer() && ros::ok()){my_drone.march_NED();}
