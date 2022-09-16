@@ -12,7 +12,7 @@ class test:
 		self.br = tf.TransformBroadcaster()
 		#self.pub = rospy.Publisher('/mavros/vision_pose/pose',PoseStamped)
 		self.sub = rospy.Subscriber("/mocap_node/drone_3/pose",PoseStamped, self.callback)
-		self.rate = rospy.Rate(50)
+		self.rate = rospy.Rate(70)
 		self.counter = 0
 		self.pose_to_send = PoseStamped()
 		self.temp = 0
