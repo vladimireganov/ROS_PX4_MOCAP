@@ -91,6 +91,8 @@ $ sudo apt-get install ros-noetic-mocap-optitrack
 `$ wstool update -t src -j4 `
 
 `$ rosdep install --from-paths src --ignore-src -y `
+  or
+`rosdep install --from-paths src --ignore-src --rosdistro melodic -y -r --os=debian:buster`
 
 `$ sudo ./src/mavros/mavros/scripts/install_geographiclib_datasets.sh `
 
