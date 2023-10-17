@@ -164,7 +164,7 @@ On main machine (in separate tabs each command)
  
  `$ roslaunch mocap_optitrack mocap.launch –screen`
  
- `$ rosrun listener test.py` python code for data streaming from mocap into proper ROS node, it also sets the proper srraming rate
+ `$ rosrun listener test.py` python code for data streaming from mocap into proper ROS node, it also sets the proper streaming rate
  
  `$ rosrun arm test_trajectory_NED`
  
