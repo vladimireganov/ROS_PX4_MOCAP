@@ -190,11 +190,16 @@ On Rpi
     - test_trajectory.cpp – main code
 
 
-### Data analysis
 
-> Will be added later
 
 ### Links
+
+
+link for [motion_capture](https://docs.px4.io/main/en/tutorials/motion-capture.html).
+link for [PX4 Autopilot GitHub](https://github.com/PX4/PX4-Autopilot).
+link for [mavros](http://wiki.ros.org/mavros).
+link for [mavros_extras](http://wiki.ros.org/mavros_extras).(Extends mavros)
+
 
 > add links to github for px4
 > add links for other important links
