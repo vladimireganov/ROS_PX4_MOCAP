@@ -201,5 +201,5 @@ link for [mavros](http://wiki.ros.org/mavros).
 link for [mavros_extras](http://wiki.ros.org/mavros_extras).(Extends mavros)
 
 
-> add links to github for px4
-> add links for other important links
+<!-- > add links to github for px4
+> add links for other important links -->
