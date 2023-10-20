@@ -71,7 +71,7 @@ $ sudo apt-get install ros-noetic-mocap-optitrack
 ``` -->
 #### Installing ROS on RPi
 - follow this guide [link](http://wiki.ros.org/ROSberryPi/Installing%20ROS%20Melodic%20on%20the%20Raspberry%20Pi)
-> **Note** 
+<!-- > **Note**  -->
 
 
 `$ mkdir -p ~/catkin_ws/src `
