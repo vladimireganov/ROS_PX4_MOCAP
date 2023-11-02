@@ -150,12 +150,18 @@ First, move to the directory of "mocap.yaml" file
 
 >`$ nano mocap.yaml`
 
+Example of how the the file should be configured. 
+
+![img1](images/mocap.PNG)
+
 
 ### Configuring px4 settings
 
 ## px4 and mocap
 Using QGC connect to px4, then go to EKF2 settings
-![img1](https://github.com/vladimireganov/ROS_PX4_MOCAP/blob/main/images/QGC.png)
+![img1](images/QGC.png)
+
+
 
 # Running code
 On main machine (in separate tabs each command)
